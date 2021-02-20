@@ -1,0 +1,17 @@
+Package: twinkle
+Maintainer: Ben Tupper <btupper@bigelow.org>
+Author: Ben Tupper <btupper@bigelow.org>
+URL: https://github.com/bigelowlab/twinkle
+Version: 0.1
+License: MIT + file LICENSE
+Title: rasf
+Description: Tools for working with stars and simple features (sf) packages.
+Encoding: UTF-8
+Depends:
+    R (>= 3.0)
+Imports:
+    rlang,
+    dplyr,
+    tidyselect,
+    sf,
+    stars

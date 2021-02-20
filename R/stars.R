@@ -194,9 +194,9 @@ random_points <- function(x,
                           form = c("table", "sf")[1]){
   
   if(FALSE){
-    x = make_toy() 
-    pts = make_toy_points()
-    poly = make_toy_polygon()
+    x = toy() 
+    pts = toy_points()
+    poly = toy_polygon()
     
     p <- random_points(x, na.rm = TRUE, form = "sf") %>%
       dplyr::filter(band == 1)
@@ -222,12 +222,12 @@ random_points <- function(x,
     plot(sf::st_geometry(poly), add = TRUE, border = "green", col = NA)
   }
   if (FALSE){
-    x = make_toy() 
+    x = toy() 
     n = 100
     m = 2
     na.rm = TRUE
-    points = make_toy_points()
-    polygon = NULL # make_toy_polygon()
+    points = toy_points()
+    polygon = NULL #toy_polygon()
   }
   
   if (!is_stars(x)) stop("Input x must be a stars class")

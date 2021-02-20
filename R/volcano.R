@@ -4,7 +4,7 @@
 #' @param nc integer, number of columns
 #' @param nr integer, number of rows
 #' @return stars mask with NA values assigned to area to be masked
-make_toy_mask <- function(nc = 10, nr = 10){
+toy_mask <- function(nc = 10, nr = 10){
   m <- matrix(seq_len(nc*nr), ncol = nc, nrow = nr, byrow = TRUE)
   m[lower.tri(m)] <- NA
   bb <- sf::st_bbox(c(xmin = 0, xmax = 10, ymin = 0, ymax = 10))
@@ -21,7 +21,7 @@ make_toy_mask <- function(nc = 10, nr = 10){
 #' @param nc integer, number of columns
 #' @param nr integer, number of rows
 #' @return sf POLYGON object
-make_toy_polygon <- function(nc = 10, nr = 10){
+toy_polygon <- function(nc = 10, nr = 10){
   dx <- nc * 0.2
   xc <- nc/2
   dy <- nr * 0.2
@@ -40,7 +40,7 @@ make_toy_polygon <- function(nc = 10, nr = 10){
 #' @param nr integer, number of rows in destination stars object
 #' @param nb integer, number of bands in destination stars object
 #' @return sf POINTS object
-make_toy_points <- function(n = 10, nc = 10, nr = 10, nb = 5){
+toy_points <- function(n = 10, nc = 10, nr = 10, nb = 5){
   
   x <- sample(nc-1, n, replace = TRUE) + runif(n, min = -1, max = 1)
   y <- sample(nr-1, n, replace = TRUE) + runif(n, min = -1, max = 1)
@@ -57,8 +57,8 @@ make_toy_points <- function(n = 10, nc = 10, nr = 10, nb = 5){
 #' @param nr integer, number of rows
 #' @param nb integer, number of bands
 #' @return stars object with regions masked
-make_toy <- function(nc = 10, nr = 10, nb = 5){
-  m <- make_toy_mask(nc = nc, nr = nr)
+toy <- function(nc = 10, nr = 10, nb = 5){
+  m <- toy_mask(nc = nc, nr = nr)
   n <- nc * nr
   lapply(seq_len(nb),
                function(i) {

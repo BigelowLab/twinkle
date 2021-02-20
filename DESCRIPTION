@@ -12,6 +12,5 @@ Depends:
 Imports:
     rlang,
     dplyr,
-    tidyselect,
     sf,
     stars

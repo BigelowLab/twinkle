@@ -42,9 +42,57 @@ library(stars)
 library(dplyr)
 
 sst <- stars::read_stars(system.file("datasets/20140601-20140630-sst.tif", package = "twinkle"))
-pts <- sf::read_sf(system.file("datasets/penbay-points.gpkg", package = 'twinkle'))
-poly <- sf::read_sf(system.file("datasets/penbay-polygons.gpkg", package = 'twinkle'))
+# stars object with 3 dimensions and 1 attribute
+# attribute(s):
+#  20140601-20140630-sst.tif 
+#  Min.   :281.4             
+#  1st Qu.:283.7             
+#  Median :284.5             
+#  Mean   :284.4             
+#  3rd Qu.:285.2             
+#  Max.   :287.6             
+#  NA's   :46050             
+# dimension(s):
+#      from to  offset delta refsys point values x/y
+# x       1 71 -69.195  0.01 WGS 84 FALSE   NULL [x]
+# y       1 72  44.505 -0.01 WGS 84 FALSE   NULL [y]
+# band    1 30      NA    NA     NA    NA   NULL  
 
+pts <- sf::read_sf(system.file("datasets/penbay-points.gpkg", package = 'twinkle'))
+# Simple feature collection with 100 features and 6 fields
+# geometry type:  POINT
+# dimension:      XY
+# bbox:           xmin: -69.18 ymin: 43.79 xmax: -68.49 ymax: 44.41
+# geographic CRS: WGS 84
+# # A tibble: 100 x 7
+#     index  cell   col   row layer   sst           geom
+#     <int> <dbl> <dbl> <dbl> <dbl> <dbl>    <POINT [°]>
+#  1  95384  3368    31    48    19  284. (-68.89 44.03)
+#  2  19875  4539    66    64     4  282. (-68.54 43.87)
+#  3 136212  3300    34    47    27  285. (-68.86 44.04)
+#  4 145992  2856    16    41    29  287.  (-69.04 44.1)
+#  5 130243  2443    29    35    26  285. (-68.91 44.16)
+#  6  78418  1738    34    25    16  284. (-68.86 44.26)
+#  7  60452  4220    31    60    12  285. (-68.89 43.91)
+#  8 104298  2058    70    29    21  285.  (-68.5 44.22)
+#  9  55121  4001    25    57    11  285. (-68.95 43.94)
+# 10  64280  2936    25    42    13  285. (-68.95 44.09)
+# # … with 90 more rows
+
+
+poly <- sf::read_sf(system.file("datasets/penbay-polygons.gpkg", package = 'twinkle'))
+# Simple feature collection with 1 feature and 0 fields
+# geometry type:  POLYGON
+# dimension:      XY
+# bbox:           xmin: -69 ymin: 43.9 xmax: -68.6 ymax: 44.2
+# geographic CRS: WGS 84
+# # A tibble: 1 x 1
+#                                             geom
+#                                    <POLYGON [°]>
+# 1 ((-69 43.9, -68.6 43.9, -68.8 44.2, -69 43.9))
+
+
+# plot just the first band
 plot(sst[,,,1], axes = TRUE, main = "MUR SST", reset = F)
 plot(sf::st_geometry(pts), add = TRUE, pch = 19, col = "orange")
 plot(poly, add = TRUE, border = "green", col = NA)
@@ -80,7 +128,7 @@ par(mfrow = c(1,1))
 ```
 ![volcano_attributes](inst/images/volcano_attributes.png)
 
-But we can reorganize and assume that instead of three different attributes that we have three bands for a single attribute.  Note the plot scales all bands into the same color scale.
+But we can reorganize so that instead of three different attributes with single bands that we have three bands for a single attribute.  Note the plot scales all bands into the same color scale.
 ```
 v_b <- volcano_multi(what = "bands")
 # stars object with 3 dimensions and 1 attribute
@@ -105,12 +153,56 @@ plot(v_b)
 
 ### Tiny Toy
 
-Multiband or multi-attribute dataset - with very small dimensions, with convenient polygons and points.
+A multiband dataset with very small dimensions, with convenient polygons and points.
 
 ```
-x <- toy() 
+x <- toy()
+# stars object with 3 dimensions and 1 attribute
+# attribute(s):
+#        X        
+#  Min.   :  1.0  
+#  1st Qu.:115.5  
+#  Median :234.0  
+#  Mean   :237.0  
+#  3rd Qu.:356.5  
+#  Max.   :500.0  
+#  NA's   :225    
+# dimension(s):
+#      from to offset delta refsys point    values x/y
+# x       1 10      0     1     NA    NA      NULL [x]
+# y       1 10     10    -1     NA    NA      NULL [y]
+# band    1  5     NA    NA     NA    NA b1,...,b5 
+
+
 pts <- toy_points()
+# Simple feature collection with 10 features and 2 fields
+# geometry type:  POINT
+# dimension:      XY
+# bbox:           xmin: 0.07982157 ymin: 0.2764683 xmax: 8.318394 ymax: 8.685324
+# CRS:            NA
+# # A tibble: 10 x 3
+#       id band                geometry
+#    <int> <chr>                <POINT>
+#  1     1 b2       (4.893872 1.545638)
+#  2     2 b1      (5.523114 0.2878492)
+#  3     3 b3    (0.07982157 0.2764683)
+#  4     4 b1       (2.738887 8.685324)
+#  5     5 b1       (5.594837 7.240075)
+#  6     6 b4       (7.357766 7.182376)
+#  7     7 b1       (1.107721 8.132763)
+#  8     8 b5        (1.55757 7.238407)
+#  9     9 b2       (8.318394 5.955514)
+# 10    10 b3       (3.623221 1.627933)
+
 poly <- toy_polygon()
+# Simple feature collection with 1 feature and 1 field
+# geometry type:  POLYGON
+# dimension:      XY
+# bbox:           xmin: 3 ymin: 2 xmax: 8 ymax: 8
+# CRS:            NA
+#   id                           geom
+# 1  1 POLYGON ((5 8, 8 5, 5 2, 3 ...
+
 
 plot(x[,,,1], axes = TRUE, reset = FALSE)
 plot(sf::st_geometry(pts), add = TRUE, pch = 19, col = "orange")

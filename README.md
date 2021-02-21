@@ -100,7 +100,7 @@ v_b <- volcano_multi(what = "bands")
 
 plot(v_b)
 ```
-![volcano_bands](inst/images/volcano_band.png)
+![volcano_bands](inst/images/volcano_bands.png)
 
 
 ### Tiny Toy
@@ -113,7 +113,7 @@ pts <- toy_points()
 poly <- toy_polygon()
 
 plot(x[,,,1], axes = TRUE, reset = FALSE)
-plot(pts["id"], add = TRUE, pch = 19, col = "orange")
+plot(sf::st_geometry(pts), add = TRUE, pch = 19, col = "orange")
 plot(poly, add = TRUE, border = "green", col = NA)
 ```
 ![toy-points-polygon](inst/images/toy-points-polygon.png)

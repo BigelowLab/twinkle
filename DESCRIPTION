@@ -10,7 +10,9 @@ Encoding: UTF-8
 Depends:
     R (>= 3.0)
 Imports:
+    stats,
     rlang,
     dplyr,
     sf,
     stars
+RoxygenNote: 7.1.1

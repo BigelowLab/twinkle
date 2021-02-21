@@ -63,6 +63,7 @@ bind_stars <- function(x, ...){
 #' @export
 #' @param index vector of multi-band index coordinates
 #' @param x stars object
+#' @param form character, specifies output format as "table" (default) or "sf"
 #' @return a tibble of index, cell, col, row, x, y, and band
 #' \itemize{
 #'  \item{index, 1-based 3d index into objects if as array}
@@ -94,8 +95,10 @@ stars_index_to_loc <- function(index, x, form  = c("table", "sf")[1]){
 #' cell x, y, and band location coordinates (cell centers).
 #'
 #' @export
-#' @param index vector of multi-band index coordinates
+#' @param pts sf POINT object with one variable whose name matches the name of the band dimension
+#'   in the \code{x}. 
 #' @param x stars object.  Limited to [x,y] of [x,y, band] dimensions
+#' @param form character, specifies output format as "table" (default) or "sf"
 #' @return a tibble of index, cell, col, row, x, y, and layer
 #' \itemize{
 #'  \item{index, 1-based 3d index into objects if as array}
@@ -138,6 +141,13 @@ stars_pts_to_loc <- function(pts, x, form  = c("table", "sf")[1]){
 #' Providing a polygon to limit the search area can speed up the search
 #' if the polygon is small relative to the spatial cover of the stars geometry.
 #'
+#' Note that it is possible
+#' to filter the available pool of candidate cells to something
+#' less than the requested sample size, n.  In such cases you might try 
+#' adjusting the value of \code{m} higher. If you still have issues then
+#' investigate the presence of NAs (if \code{na.rm = TRUE}), or the size 
+#' of the \code{polygon} (if provided.)  
+#'         
 #' @export
 #' @param x stars object
 #' @param n numeric, the number of points to return
@@ -148,41 +158,42 @@ stars_pts_to_loc <- function(pts, x, form  = c("table", "sf")[1]){
 #'        then point avoidance is handled.  Ignored if NULL.
 #' @param polygon polygon (sf) that describes the region to select
 #'        points from.  Ignored if NULL.
-#' @param form character, either "table" (default) or "sf"
-#' @return a table or sf POINT object of locations with values.  Note that it is possible
-#'         to filter the available pool of candidate cells to something
-#'         less than the requested sample, n.  In such cases you might try 
-#'         adjusting the value of \code{m} higher. If you still have issues then
-#'         investigate the presence of NAs (if \code{na.rm = TRUE}), or the size 
-#'         of the \code{polygon} (if provided.)  
+#' @param form character, specifies output format as "table" (default) or "sf"
+#' @return a table or sf POINT object of locations with values.  
 #' @examples
 #' \dontrun{
-#  x = make_toy() 
-#  pts = make_toy_points()
-#  poly = make_toy_polygon()
-#  
-#  p <- random_points(x, na.rm = TRUE, form = "sf") %>%
-#    dplyr::filter(band == 1)
-#  plot(x[,,,1], reset = FALSE, axes = TRUE, main = "avoiding NAs")
-#  plot(sf::st_geometry(dplyr::filter(p, band == 1)), add = TRUE, pch = 19, col = "orange")
-#  
-#  p <- random_points(x, points = pts, form = "sf") %>%
-#    dplyr::filter(band == 1)
-#  plot(x[,,,1], reset = FALSE, axes = TRUE, main = "avoiding points")
-#  plot(sf::st_geometry(dplyr::filter(p, band == 1)), add = TRUE, pch = 19, col = "orange")
-#  plot(sf::st_geometry(dplyr::filter(pts, band == "b1")), add = TRUE, pch = 1, col = "green", cex = 2)
-#  
-#  p <- random_points(x, polygon = poly, form = "sf") %>%
-#    dplyr::filter(band == 1)
-#  plot(x[,,,1], reset = FALSE, axes = TRUE, main = "within a polygon")
-#  plot(sf::st_geometry(dplyr::filter(p, band == 1)), add = TRUE, pch = 19, col = "orange")
-#  plot(sf::st_geometry(poly), add = TRUE, border = "green", col = NA)
-#  
-#  p <- random_points(x, polygon = poly, na.rm = TRUE, form = "sf") %>%
-#    dplyr::filter(band == 1)
-#  plot(x[,,,1], reset = FALSE, axes = TRUE, main = "within a polygon avoiding NAs")
-#  plot(sf::st_geometry(dplyr::filter(p, band == 1)), add = TRUE, pch = 19, col = "orange")
-#  plot(sf::st_geometry(poly), add = TRUE, border = "green", col = NA)
+#'  x <- make_toy() 
+#'  pts <- make_toy_points()
+#'  poly <- make_toy_polygon()
+#'  
+#'  p <- random_points(x, na.rm = TRUE, form = "sf") %>%
+#'    dplyr::filter(band == 1)
+#'  plot(x[,,,1], reset = FALSE, axes = TRUE, main = "avoiding NAs")
+#'  plot(sf::st_geometry(dplyr::filter(p, band == 1)), 
+#'       add = TRUE, pch = 19, col = "orange")
+#'  
+#'  p <- random_points(x, points = pts, form = "sf") %>%
+#'    dplyr::filter(band == 1)
+#'  plot(x[,,,1], reset = FALSE, axes = TRUE, main = "avoiding points")
+#'  plot(sf::st_geometry(dplyr::filter(p, band == 1)), 
+#'       add = TRUE, pch = 19, col = "orange")
+#'  plot(sf::st_geometry(dplyr::filter(pts, band == "b1")), 
+#'       add = TRUE, pch = 1, col = "green", cex = 2)
+#'  
+#'  p <- random_points(x, polygon = poly, form = "sf") %>%
+#'    dplyr::filter(band == 1)
+#'  plot(x[,,,1], reset = FALSE, axes = TRUE, main = "within a polygon")
+#'  plot(sf::st_geometry(dplyr::filter(p, band == 1)), 
+#'       add = TRUE, pch = 19, col = "orange")
+#'  plot(sf::st_geometry(poly), add = TRUE, border = "green", col = NA)
+#'  
+#'  p <- random_points(x, polygon = poly, na.rm = TRUE, form = "sf") %>%
+#'    dplyr::filter(band == 1)
+#'  plot(x[,,,1], reset = FALSE, axes = TRUE, main = "within a polygon avoiding NAs")
+#'  plot(sf::st_geometry(dplyr::filter(p, band == 1)), 
+#'       add = TRUE, pch = 19, col = "orange")
+#'  plot(sf::st_geometry(poly), 
+#'       add = TRUE, border = "green", col = NA)
 #' 
 #' }
 random_points <- function(x, 
@@ -282,7 +293,7 @@ random_points <- function(x,
   
   loc <- loc %>%
     dplyr::bind_cols(vals) %>%
-    dplyr::relocate(.data$geometry, .after = tidyselect::last_col())
+    dplyr::relocate(.data$geometry, .after = dplyr::last_col())
   if (nrow(loc) < n){
     warning("fewer than requested points sampled - try increasing value of m")
   } else {

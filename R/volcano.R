@@ -60,12 +60,14 @@ toy_points <- function(n = 10, nc = 10, nr = 10, nb = 5){
 toy <- function(nc = 10, nr = 10, nb = 5){
   m <- toy_mask(nc = nc, nr = nr)
   n <- nc * nr
-  lapply(seq_len(nb),
-               function(i) {
-                 m <- m + ((i-1) * n)
-                 names(m) <- paste0("b", i)
-                 m
-               }) %>%
+  idx <- seq_len(nb)
+  names(idx) <- paste0("b", idx)
+  sapply(seq_len(nb),
+         function(i) {
+           m <- m + ((i-1) * n)
+           names(m) <- paste0("b", i)
+           m
+         }, simplify = FALSE, USE.NAMES = TRUE) %>%
     bind_stars() %>%
     merge(name = "band")
 }

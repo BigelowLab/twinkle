@@ -50,10 +50,14 @@ shape_stars <- function(x){
 #' 
 #' @export
 #' @param x list of one or more \code{stars} objects
+#' @param nms character, vector of names to apply to attributes
 #' @param ... arguments for \code{\link[stars]{c.stars}}
 #' @return \code{stars} objects
-bind_stars <- function(x, ...){
-  do.call(c, x)
+bind_stars <- function(x, nms = names(x), ...){
+  y <- do.call(c, x)
+  if (is.null(names)) names <- paste("b", seq_len(length(x)))
+  names(y) <- nms
+  y
 }
 
 
@@ -204,34 +208,6 @@ random_points <- function(x,
                           polygon = NULL,
                           form = c("table", "sf")[1]){
   
-  if(FALSE){
-    x = toy() 
-    pts = toy_points()
-    poly = toy_polygon()
-    
-    p <- random_points(x, na.rm = TRUE, form = "sf") %>%
-      dplyr::filter(band == 1)
-    plot(x[,,,1], reset = FALSE, axes = TRUE, main = "avoiding NAs")
-    plot(sf::st_geometry(dplyr::filter(p, band == 1)), add = TRUE, pch = 19, col = "orange")
-    
-    p <- random_points(x, points = pts, form = "sf") %>%
-      dplyr::filter(band == 1)
-    plot(x[,,,1], reset = FALSE, axes = TRUE, main = "avoiding points")
-    plot(sf::st_geometry(dplyr::filter(p, band == 1)), add = TRUE, pch = 19, col = "orange")
-    plot(sf::st_geometry(dplyr::filter(pts, band == "b1")), add = TRUE, pch = 1, col = "green", cex = 2)
-    
-    p <- random_points(x, polygon = poly, form = "sf") %>%
-      dplyr::filter(band == 1)
-    plot(x[,,,1], reset = FALSE, axes = TRUE, main = "within a polygon")
-    plot(sf::st_geometry(dplyr::filter(p, band == 1)), add = TRUE, pch = 19, col = "orange")
-    plot(sf::st_geometry(poly), add = TRUE, border = "green", col = NA)
-    
-    p <- random_points(x, polygon = poly, na.rm = TRUE, form = "sf") %>%
-      dplyr::filter(band == 1)
-    plot(x[,,,1], reset = FALSE, axes = TRUE, main = "within a polygon avoiding NAs")
-    plot(sf::st_geometry(dplyr::filter(p, band == 1)), add = TRUE, pch = 19, col = "orange")
-    plot(sf::st_geometry(poly), add = TRUE, border = "green", col = NA)
-  }
   if (FALSE){
     x = toy() 
     n = 100
@@ -239,6 +215,24 @@ random_points <- function(x,
     na.rm = TRUE
     points = toy_points()
     polygon = NULL #toy_polygon()
+  }
+  if (FALSE){
+    n = 100
+    m = 2
+    na.rm = TRUE
+    x <- list(
+      stars::read_stars(system.file("datasets/20140601-20140630-sst.tif", 
+                                    package = "twinkle"))[,,,1:2],
+      stars::read_stars(system.file("datasets/20140601-20140630-sst_slope.tif", 
+                                    package = "twinkle"))[,,,1:2],
+      stars::read_stars(system.file("datasets/20140601-20140630-sst_cum.tif", 
+                                    package = "twinkle"))[,,,1:2] ) %>%
+      bind_stars(along = 1, nms = c("sst", "slope", "cum"))
+    
+    points <- sf::read_sf(system.file("datasets/penbay-points.gpkg", package = 'twinkle')) %>%
+      dplyr::filter(layer %in% (1:2))
+    
+    polygon <- sf::read_sf(system.file("datasets/penbay-polygons.gpkg", package = 'twinkle'))
   }
   
   if (!is_stars(x)) stop("Input x must be a stars class")
@@ -291,8 +285,28 @@ random_points <- function(x,
       dplyr::filter(ix)
   }
   
+  reduce_to_band <- function(x, nms = names(x)){
+    # match the column names (sst.V1, sst.V2, ...) to each name (sst)
+    # for each group 
+    #    m = build matrix of columns
+    #    mutate original to add sst = m[,band] and drop (sst.V1, sst.V2, ...)
+    onames <- names(x)
+    for (name in nms){
+      vnames <- colnames(x)
+      ix <- grep(paste0("^",name), vnames)
+      m <- as.matrix(x %>% dplyr::as_tibble() %>% dplyr::select(vnames[ix]))
+      
+      x <- x %>%
+        dplyr::mutate(!!name := sapply(seq_len(nrow(m)), function(i) m[i,.data$band[i]] )) %>%
+        dplyr::select(-!!vnames[ix])
+    }
+    x
+  }
+  
+  
   loc <- loc %>%
     dplyr::bind_cols(vals) %>%
+    reduce_to_band(nms = names(x)) %>%
     dplyr::relocate(.data$geometry, .after = dplyr::last_col())
   if (nrow(loc) < n){
     warning("fewer than requested points sampled - try increasing value of m")

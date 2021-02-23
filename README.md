@@ -23,6 +23,9 @@ A small set of R tools to use with [sf](https://CRAN.R-project.org/package=sf) a
  
  + [https://r-spatial.github.io](https://r-spatial.github.io/stars/)
 
+## Intended usage
+
+`stars` will handle a wide variety of data models, but this package is intended for use with regular grids with 3 dimensions such as [x, y, band], [x, y, time] or [x, y, z].  See about the  `stars` data model [here](https://r-spatial.github.io/stars/articles/stars4.html).  
 
 ## Provided example data
 
@@ -30,11 +33,21 @@ A small set of R tools to use with [sf](https://CRAN.R-project.org/package=sf) a
 
 One month of daily MUR SST rasters (as one GeoTIFF) from 2014 covering Penobscot Bay, Maine. The bounding box `[west, east, south, north]` is `[-69.2, -68.49, 43.78, 44.5]`. Dates provided are 2014-06-01 through 2014-06-30.  Also provided are daily sst slope and daily cumulative sst (origin January 1).  These are named `20140601-20140630-sst.tif`, `20140601-20140630-sst_slope.tif` amd `20140601-20140630-sst_cum.tif`.
 
+```
+sst <- stars::read_stars(system.file("datasets/20140601-20140630-sst.tif", 
+                                     package = "twinkle")),
+slope <- stars::read_stars(system.file("datasets/20140601-20140630-sst_slope.tif", 
+                                       package = "twinkle")),
+cum <- stars::read_stars(system.file("datasets/20140601-20140630-sst_cum.tif", 
+                                     package = "twinkle"))
+```
+                                       
+These data are derived from...
 > JPL MUR MEaSUREs Project. 2015. GHRSST Level 4 MUR Global Foundation Sea Surface Temperature Analysis. Ver. 4.1. PO.DAAC, CA, USA. Dataset accessed [2021-02-08] at https://doi.org/10.5067/GHGMR-4FJ04
 
-100 points within Penobscot Bay, selected at random, stored in [geopackage](https://www.geopackage.org/) format. Use `sf::read_sf(system.file("datasets/penbay-points.gpkg", package = 'twinkle))` to read them in.
+100 points within Penobscot Bay, selected at random, stored in [geopackage](https://www.geopackage.org/) format. Use `sf::read_sf(system.file("datasets/penbay-points.gpkg", package = 'twinkle'))` to read them in.
 
-A polygons within Penobscot Bay stored in [geopackage](https://www.geopackage.org/) format.  Use `sf::read_sf(system.file("datasets/penbay-polygons.gpkg", package = 'twinkle))` to them in.
+A polygons within Penobscot Bay stored in [geopackage](https://www.geopackage.org/) format.  Use `sf::read_sf(system.file("datasets/penbay-polygons.gpkg", package = 'twinkle'))` to them in.
 
 ```
 library(sf)

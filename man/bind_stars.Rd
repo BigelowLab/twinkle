@@ -4,10 +4,12 @@
 \alias{bind_stars}
 \title{Bind a list of \code{stars} objects.}
 \usage{
-bind_stars(x, ...)
+bind_stars(x, nms = names(x), ...)
 }
 \arguments{
 \item{x}{list of one or more \code{stars} objects}
+
+\item{nms}{character, vector of names to apply to attributes}
 
 \item{...}{arguments for \code{\link[stars]{c.stars}}}
 }

@@ -14,5 +14,6 @@ Imports:
     rlang,
     dplyr,
     sf,
-    stars
+    stars,
+    geometry
 RoxygenNote: 7.1.1

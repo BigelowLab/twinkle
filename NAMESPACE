@@ -2,6 +2,8 @@
 
 export(bind_stars)
 export(is_stars)
+export(points_to_convexhull)
+export(points_to_mesh)
 export(random_points)
 export(shape_stars)
 export(stars_index_to_loc)

@@ -8,6 +8,16 @@ is_stars <- function(x, class = 'stars') {
   inherits(x, class)
 }
 
+#' Set names of an object
+#' 
+#' @seealso \code{\link[stats]{setNames}}
+#' @param x object with name-able elements
+#' @param nm character vector of names, by default \code{v1, v2, v3, ...}
+#' @return the input object with names
+set_names <- function(x, nm = paste0("v", seq_len(length(x)))){
+  stats::setNames(x, nm)
+}
+
 #' Assemble a vector of stars dimension or shape
 #'
 #' @export

@@ -24,7 +24,7 @@ A small set of R tools to use with [sf](https://CRAN.R-project.org/package=sf) a
  
  + [`sf` guide](http://r-spatial.github.io/sf/)
  
- + [`stars guide`](https://r-spatial.github.io/stars/)
+ + [`stars` guide](https://r-spatial.github.io/stars/)
  
  + [Geocomputation with R](https://geocompr.robinlovelace.net/) (*n.b.* [raster](https://CRAN.R-project.org/package=raster) centric)
 

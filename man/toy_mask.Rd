@@ -2,7 +2,7 @@
 % Please edit documentation in R/toy.R
 \name{toy_mask}
 \alias{toy_mask}
-\title{Create a lightweight toy stars object}
+\title{Create a lightweight toy \code{stars} object}
 \usage{
 toy_mask(nc = 10, nr = 10)
 }
@@ -15,5 +15,5 @@ toy_mask(nc = 10, nr = 10)
 stars mask with NA values assigned to area to be masked
 }
 \description{
-Create a lightweight toy stars object
+Create a lightweight toy \code{stars} object
 }

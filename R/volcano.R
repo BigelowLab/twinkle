@@ -58,9 +58,9 @@ volcano_multi <- function(n = 3,
     set_names(sprintf("v%i", seq_len(n)))
   
   if (tolower(what[1]) == "bands"){
-    v <- merge(v, name = "band")
+    v <- merge(v, name = "band") %>%
+      set_names("v")
   }
-  
   v
 }
 

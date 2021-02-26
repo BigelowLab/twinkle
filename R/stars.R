@@ -219,11 +219,11 @@ random_points <- function(x,
                           form = c("table", "sf")[1]){
   
   if (FALSE){
-    x = toy() 
+    x = volcano_multi(what = "bands") # toy_multi()
     n = 100
     m = 2
-    na.rm = TRUE
-    points = toy_points()
+    na.rm = FALSE
+    points = NULL # volcano_points(x)
     polygon = NULL #toy_polygon()
   }
   if (FALSE){
@@ -296,19 +296,21 @@ random_points <- function(x,
   }
   
   reduce_to_band <- function(x, nms = names(x)){
-    # match the column names (sst.V1, sst.V2, ...) to each name (sst)
-    # for each group 
-    #    m = build matrix of columns
-    #    mutate original to add sst = m[,band] and drop (sst.V1, sst.V2, ...)
-    onames <- names(x)
-    for (name in nms){
-      vnames <- colnames(x)
-      ix <- grep(paste0("^",name), vnames)
-      m <- as.matrix(x %>% dplyr::as_tibble() %>% dplyr::select(vnames[ix]))
-      
-      x <- x %>%
-        dplyr::mutate(!!name := sapply(seq_len(nrow(m)), function(i) m[i,.data$band[i]] )) %>%
-        dplyr::select(-!!vnames[ix])
+    if (length(x) > 1){
+      # match the column names (sst.V1, sst.V2, ...) to each name (sst)
+      # for each group 
+      #    m = build matrix of columns
+      #    mutate original to add sst = m[,band] and drop (sst.V1, sst.V2, ...)
+      onames <- names(x)
+      for (name in nms){
+        vnames <- colnames(x)
+        ix <- grep(paste0("^",name), vnames)
+        m <- as.matrix(x %>% dplyr::as_tibble() %>% dplyr::select(vnames[ix]))
+        
+        x <- x %>%
+          dplyr::mutate(!!name := sapply(seq_len(nrow(m)), function(i) m[i,.data$band[i]] )) %>%
+          dplyr::select(-!!vnames[ix])
+      }
     }
     x
   }

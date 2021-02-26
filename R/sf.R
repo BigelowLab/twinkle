@@ -29,3 +29,24 @@ points_to_polygon <- function(x = dplyr::tibble(x = c(1,2,1,0),
   sf::st_polygon(x = list(m)) %>% 
     sf::st_sfc(crs = crs)
 }
+
+
+points_in_polygons <- function(x, y){
+  if(FALSE){
+    y1 <- volcano_polygon()
+    y2 <- st_rotate(y1, pi/2)
+      dplyr::bind_rows(st_rotate())
+    x = volcano_points(x = volcano_multi(what = "bands"))
+  }
+  
+  pid <- rep(NA_character_, nrow(x))
+  index <- sf::st_contains(y, x)
+  p <- sapply(index, 
+                function(idx){
+                  #cat(str(idx,"\n"))
+                  pid[idx] <- ifelse(is.na(pid[idx]), idx, paste(pid[idx], idx, sep = ","))
+                  pid
+                })
+  
+  
+}

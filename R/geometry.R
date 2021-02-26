@@ -1,3 +1,69 @@
+#' Translate a simple feature 
+#' 
+#' @seealso https://r-spatial.github.io/sf/articles/sf3.html#affine-transformations-1
+#' @param x sf object
+#' @param d numeric, values to translate by in order of [x, y]
+#' @return a translated version of the input \code{x}
+#' @examples
+#' \dontrun{
+#'   v <- volcano_multi(what = 'bands')
+#'   x <-  volcano_polygon()
+#'   x2 <- st_translate(x, c(-250, 120))
+#'   plot(v[,,,1], reset = FALSE, axes = TRUE)
+#'   plot(sf::st_geometry(x), add = TRUE, border = "purple", col = NA, lwd = 3)
+#'   plot(sf::st_geometry(x2), add = TRUE, border = "orange", col = NA, lwd = 3)
+#' }
+st_translate <- function(x, d = c(0,0)){
+  
+  if (FALSE){
+    v <- volcano_multi(what = 'bands')
+    x <-  volcano_polygon()
+    x2 <- st_translate(x, c(-250, 120))
+    plot(v[,,,1], reset = FALSE, axes = TRUE)
+    plot(sf::st_geometry(x), add = TRUE, border = "purple", col = NA, lwd = 3)
+    plot(sf::st_geometry(x2), add = TRUE, border = "orange", col = NA, lwd = 3)
+  }
+
+  sf::st_set_geometry(x, sf::st_geometry(x) + d)
+}
+
+
+#' Rotate a simple feature 
+#' 
+#' @seealso https://r-spatial.github.io/sf/articles/sf3.html#affine-transformations-1
+#' @param x sf object
+#' @param r numeric, radians (or degrees) to rotate
+#' @param degrees logical, if TRUE intepret \code{r} as degrees instead of radians
+#' @return a rotated version of the input \code{x}
+#' @examples
+#' \dontrun{
+#'  v <- volcano_multi(what = 'bands')
+#'  x <-  volcano_polygon()
+#'  x2 <- st_rotate(x, -pi/8)
+#'  plot(v[,,,1], reset = FALSE)
+#'  plot(sf::st_geometry(x), add = TRUE, border = "purple", col = NA, lwd = 3)
+#'  plot(sf::st_geometry(x2), add = TRUE, border = "orange", col = NA, lwd = 3)
+#' }
+st_rotate <- function(x, r = pi/2, degrees = FALSE){
+  
+  if (FALSE){
+    v <- volcano_multi(what = 'bands')
+    x <-  volcano_polygon()
+    x2 <- st_rotate(x, -pi/8)
+    plot(v[,,,1], reset = FALSE)
+    plot(sf::st_geometry(x), add = TRUE, border = "purple", col = NA, lwd = 3)
+    plot(sf::st_geometry(x2), add = TRUE, border = "orange", col = NA, lwd = 3)
+  }
+  
+  if (degrees) r <- r * (pi/180)
+  
+  rot <- function(a) matrix(c(cos(a), sin(a), -sin(a), cos(a)), 2, 2)
+  
+  xg <- sf::st_geometry(x)
+  xc <- sf::st_centroid(xg)
+  x %>% 
+    sf::st_set_geometry((xg - xc) * rot(r) + xc)
+}
 
 #' Convert sfc_POINTS to a mesh of polygons (delaunay triangulation)
 #'

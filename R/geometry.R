@@ -4,6 +4,7 @@
 #' @param x sf object
 #' @param d numeric, values to translate by in order of [x, y]
 #' @return a translated version of the input \code{x}
+#' @export
 #' @examples
 #' \dontrun{
 #'   v <- volcano_multi(what = 'bands')
@@ -35,6 +36,7 @@ st_translate <- function(x, d = c(0,0)){
 #' @param r numeric, radians (or degrees) to rotate
 #' @param degrees logical, if TRUE intepret \code{r} as degrees instead of radians
 #' @return a rotated version of the input \code{x}
+#' @export
 #' @examples
 #' \dontrun{
 #'  v <- volcano_multi(what = 'bands')

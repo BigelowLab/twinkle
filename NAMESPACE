@@ -2,6 +2,7 @@
 
 export(bind_stars)
 export(is_stars)
+export(match_points_to_polygons)
 export(points_to_convexhull)
 export(points_to_mesh)
 export(points_to_polygon)

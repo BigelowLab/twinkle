@@ -57,7 +57,7 @@ volcano_multi <- function(n = 3,
     bind_stars() %>%
     set_names(sprintf("v%i", seq_len(n)))
   
-  if (tolower(what[1]) == "bands"){
+  if (grepl("band", tolower(what[1]), fixed = TRUE)[1]){
     v <- merge(v, name = "band") %>%
       set_names("v")
   }

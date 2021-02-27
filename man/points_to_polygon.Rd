@@ -35,5 +35,5 @@ Given a table of x and y coordinates data generate a sfc_POLYGON
    dplyr::group_by(name) \%>\%
    dplyr::group_map(make_one_polygon, crs = "WGS84") \%>\%
    dplyr::bind_rows()
-}
+}m
 }

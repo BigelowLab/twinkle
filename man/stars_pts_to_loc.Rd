@@ -2,7 +2,7 @@
 % Please edit documentation in R/stars.R
 \name{stars_pts_to_loc}
 \alias{stars_pts_to_loc}
-\title{Convert a sf POINTS object with a band variable into stars object to row, col, 
+\title{Convert a sf POINTS object with a band variable into stars object to row, col,
 cell x, y, and band location coordinates (cell centers).}
 \usage{
 stars_pts_to_loc(pts, x, form = c("table", "sf")[1])
@@ -28,6 +28,6 @@ a tibble of index, cell, col, row, x, y, and layer
 }
 }
 \description{
-Convert a sf POINTS object with a band variable into stars object to row, col, 
+Convert a sf POINTS object with a band variable into stars object to row, col,
 cell x, y, and band location coordinates (cell centers).
 }

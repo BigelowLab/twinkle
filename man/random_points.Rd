@@ -42,44 +42,44 @@ if the polygon is small relative to the spatial cover of the stars geometry.
 \details{
 Note that it is possible
 to filter the available pool of candidate cells to something
-less than the requested sample size, n.  In such cases you might try 
+less than the requested sample size, n.  In such cases you might try
 adjusting the value of \code{m} higher. If you still have issues then
-investigate the presence of NAs (if \code{na.rm = TRUE}), or the size 
+investigate the presence of NAs (if \code{na.rm = TRUE}), or the size
 of the \code{polygon} (if provided.)
 }
 \examples{
 \dontrun{
- x <- make_toy() 
+ x <- make_toy()
  pts <- make_toy_points()
  poly <- make_toy_polygon()
- 
+
  p <- random_points(x, na.rm = TRUE, form = "sf") \%>\%
    dplyr::filter(band == 1)
  plot(x[,,,1], reset = FALSE, axes = TRUE, main = "avoiding NAs")
- plot(sf::st_geometry(dplyr::filter(p, band == 1)), 
+ plot(sf::st_geometry(dplyr::filter(p, band == 1)),
       add = TRUE, pch = 19, col = "orange")
- 
+
  p <- random_points(x, points = pts, form = "sf") \%>\%
    dplyr::filter(band == 1)
  plot(x[,,,1], reset = FALSE, axes = TRUE, main = "avoiding points")
- plot(sf::st_geometry(dplyr::filter(p, band == 1)), 
+ plot(sf::st_geometry(dplyr::filter(p, band == 1)),
       add = TRUE, pch = 19, col = "orange")
- plot(sf::st_geometry(dplyr::filter(pts, band == "b1")), 
+ plot(sf::st_geometry(dplyr::filter(pts, band == "b1")),
       add = TRUE, pch = 1, col = "green", cex = 2)
- 
+
  p <- random_points(x, polygon = poly, form = "sf") \%>\%
    dplyr::filter(band == 1)
  plot(x[,,,1], reset = FALSE, axes = TRUE, main = "within a polygon")
- plot(sf::st_geometry(dplyr::filter(p, band == 1)), 
+ plot(sf::st_geometry(dplyr::filter(p, band == 1)),
       add = TRUE, pch = 19, col = "orange")
  plot(sf::st_geometry(poly), add = TRUE, border = "green", col = NA)
- 
+
  p <- random_points(x, polygon = poly, na.rm = TRUE, form = "sf") \%>\%
    dplyr::filter(band == 1)
  plot(x[,,,1], reset = FALSE, axes = TRUE, main = "within a polygon avoiding NAs")
- plot(sf::st_geometry(dplyr::filter(p, band == 1)), 
+ plot(sf::st_geometry(dplyr::filter(p, band == 1)),
       add = TRUE, pch = 19, col = "orange")
- plot(sf::st_geometry(poly), 
+ plot(sf::st_geometry(poly),
       add = TRUE, border = "green", col = NA)
 
 }

@@ -7,7 +7,3 @@
 #' @importFrom rlang .data := !!
 #' @importFrom stats complete.cases runif setNames
 NULL
-
-load_packages <- function(packages = c("rlang", "dplyr", "sf", "stars")){
-  for (p in packages){require(p, character.only = TRUE)}
-}

@@ -1,3 +1,43 @@
+#' Plot multiple attributes of a stars object
+#' 
+#' This is pretty limited, and legends (keys) are disabled.
+#' 
+#' @seealso https://github.com/r-spatial/stars/issues/374#issuecomment-761773542
+#' @export
+#' @param x stars object with one or more attributes
+#' @param key.pos see \code{\link[stars]{plot}}
+#' @param mfrow see \code{\link[graphics]{par}}
+#' @param band see \code{\link[stars]{plot}}
+#' @param ... other arguments for \code{\link[stars]{plot}}
+#' @examples
+#' \dontrun{
+#' v = volcano_single(threshold = 120)
+#' lut = make_raster_lut(v)
+#' x = c(v, lut)
+#' mplot(v)
+#' }
+mplot <- function(x = volcano_multi(threshold = 120), 
+                  key.pos = NULL,
+                  mfrow = c(1, length(x)),
+                  band = 1,
+                  ...){
+  
+  opar <- par(no.readonly = TRUE)
+  on.exit(par(opar))
+  
+  par(mfrow = mfrow)
+  
+  sh = shape_stars(x)
+  for (a in seq_len(sh[['natt']])) {
+    if (sh[["nband"]] > 1){
+      plot(x[a,,,], band = band, key.pos = key.pos, reset = FALSE, ...)
+    } else {
+      plot(x[a,,], band = band, key.pos = key.pos, reset = FALSE, ...)
+    }
+  }
+  invisible(NULL)
+}
+
 #' Make a neighborhood LUT, where each cell value contains the 1-d address of 
 #' the closest non-missing cell (which might be itself). 
 #' 
@@ -13,107 +53,54 @@
 #' \dontrun{
 #' library(stars)
 #' library(twinkle)
-#' library(dplyr)
-#' v = volcano_single() |> 
-#'   dplyr::mutate(values = dplyr::case_when(values < 120 ~ NA_real_,  
-#'                                           values >= 120 ~ values))
-#' lut <- make_raster_lut(mask)
+#' v = volcano_single(threshold = 120)
+#' lut <- make_raster_lut(v)
 #' z <- c(mask, lut)
 #' names(z) <- c("mask", "lut")
-#' plot(z)
+#' mplot(z)
 #' }
-make_raster_lut <- function(x, mask_value = NA_real_, 
+make_raster_lut <- function(x = volcano_single(threshold = 120), 
+                            mask_value = NA, 
                             nonreassigned_value = "cellnumber"){
   
-  lut <- x[1,,,1]
+  shp <- shape_stars(x)
   
-  
-}
-
-
-
-#' A wrapper around base::findInterval() that allows decreasing values in the
-#' value of the vector within which we wish to place values of x.
-#'
-#' When \code{vec} is in ascending order we use \code{base::findInterval()}, but
-#' when \code{vec} is in descending order we implement an adaptation of the
-#' \code{locate()} function from Numerical Recipes for C \url{http://apps.nrbook.com/c/index.html}
-#'
-#' @export
-#' @param x numeric values we wish to located within \code{vec}
-#' @param vec numeric vector of sorted values (ascending or descending order)
-#'    within which we wish to find the placement of \code{x}
-#' @param rightmost.closed see \link{findInterval}
-#' @param all.inside see \link{findInterval}
-#' @return see \link{findInterval}
-find_interval <- function(x, vec, rightmost.closed = FALSE, all.inside = FALSE){
-
-  # locate one value of x within v
-  # @param v ordered numeric vector
-  # @param x one numeric lo locate within v
-  # @return index into v
-  locate_one <- function(v, x){
-    n <- length(v)
-    ascnd <- v[n] >= v[1]
-    iL <- 1
-    iU <- n
-    while((iU-iL) > 1){
-      iM <- bitwShiftR((iU+iL),1)
-      if (ascnd){
-        if (x >= v[iM]){
-          iL <- iM
-        } else {
-          iU <- iM
-        }
-      } else {
-        if (x <= v[iM]){
-          iL <- iM
-        } else {
-          iU <- iM
-        }
-      }
-    }
-
-    if (ascnd) {
-      if ( val < v[1]) {
-        index <- 0
-      } else if (x >= v[n]) {
-        index <- n
-      } else {
-        index <- iL
-      }
-    } else {
-      if ( x > v[1]) {
-        index <- 0
-      } else if (x <= vec[n]) {
-        index <- n
-      } else {
-        index <- iL
-      }
-    }
-    return(index)
-  }  # locate_one
-
-  ascending <- vec[length(vec)] >= vec[1]
-
-  if (!ascending) {
-    # here we do our own implementation (with a performance hit)
-    j <- sapply(x, function(x, v=NULL) locate_one(v,x), v = vec)
-    nv <- length(vec)
-    if (all.inside){
-      j[j < 1] <- 1
-      j[j >= nv] <- nv - 1
-    }
-    if (rightmost.closed){
-      j[x <= vec[nv]] <- nv - 1
-    }
+  # slice out a one-attribute one-band layer
+  # add to it an index_ 
+  lut <- if (shp[['nband']] > 1) {
+    x[1,,,,1] 
   } else {
-    # this is plain vanilla stuff we pass to findInterval
-    j <- base::findInterval(x, vec,
-                            rightmost.closed = rightmost.closed, all.inside = all.inside)
+    x[1,,]
+  } |>
+  dplyr::mutate(index_ = seq_len(prod(shp[c("ncol", "nrow")])))  
+  # convert to a data frame
+  lutdf <- dplyr::as_tibble(lut)
+  isna <- if (is.na(mask_value[1])){
+      is.na(lutdf[[3]])
+    } else {
+      dplyr::near(lutdf[[3]], mask_value[1])
+    }
+  # if there are no cells that are flagged as 'masked' then we simply
+  # return the native indexing
+  if (!any(isna)){
+    return(dplyr::select(lutdf, "index_") |> set_names("index"))
   }
-  j
-}  # find_interval
+  
+  goodpts <- dplyr::filter(lutdf, !isna)
+  ix <- RANN::nn2(goodpts[1:2], 
+                  lutdf[1:2] |> dplyr::filter(isna),
+                  k = 1)
+  
+  lutdf$index_[isna] <- goodpts$index_[ix$nn.idx]   
+  
+  if (!inherits(nonreassigned_value, "character")){
+    lutdf$index_[!isna] <-  nonreassigned_value
+  }
+  
+  dplyr::mutate(lut, index = lutdf$index_) |>
+    dplyr::select(dplyr::all_of("index"))
+  
+} #make_raster_lut
 
 
 #' Test is an object inherits from \code{stars} class
@@ -126,15 +113,15 @@ is_stars <- function(x, class = 'stars') {
   inherits(x, class)
 }
 
-#' Set names of an object
-#'
-#' @seealso \code{\link[stats]{setNames}}
-#' @param x object with name-able elements
-#' @param nm character vector of names, by default \code{v1, v2, v3, ...}
-#' @return the input object with names
-set_names <- function(x, nm = paste0("v", seq_len(length(x)))){
-  stats::setNames(x, nm)
-}
+#   Set names of an object
+#  
+#   @seealso \code{\link[stats]{setNames}}
+#   @param x object with name-able elements
+#   @param nm character vector of names, by default \code{v1, v2, v3, ...}
+#   @return the input object with names
+#   set_names <- function(x, nm = paste0("v", seq_len(length(x)))){
+#     stats::setNames(x, nm)
+#   }
 
 #' Assemble a vector of stars dimension or shape
 #'
@@ -262,18 +249,18 @@ stars_pts_to_loc <- function(pts, x, form  = c("table", "sf")[1]){
   }
   shape <- shape_stars(x)
   if (FALSE){
-    xy <- sf::st_coordinates(pts) %>%
+    xy <- sf::st_coordinates(pts) |>
       dplyr::as_tibble()
     xv <- stars::st_get_dimension_values(x, which = 1)
     yv <- stars::st_get_dimension_values(x, which = 2)
     ix <- findInterval(xy$X, xv)
-    iy <- (xy$Y <= yv & xy$Y > yv) %>% which()
+    iy <- (xy$Y <= yv & xy$Y > yv) |> which()
     zv <- stars::st_get_dimension_values(x, which = bandname)
 
   }
 
   xp <- stars::st_xy2sfc(x[,,,1], as_points = FALSE, na.rm = FALSE)
-  cell <- sf::st_intersects(sf::st_geometry(pts), sf::st_geometry(xp)) %>%
+  cell <- sf::st_intersects(sf::st_geometry(pts), sf::st_geometry(xp)) |>
     unlist()
   bandvals <- stars::st_get_dimension_values(x, which = bandname)
   band <- match(pts[[bandname]], bandvals)
@@ -320,13 +307,13 @@ stars_pts_to_loc <- function(pts, x, form  = c("table", "sf")[1]){
 #'  pts <- make_toy_points()
 #'  poly <- make_toy_polygon()
 #'
-#'  p <- random_points(x, na.rm = TRUE, form = "sf") %>%
+#'  p <- random_points(x, na.rm = TRUE, form = "sf") |>
 #'    dplyr::filter(band == 1)
 #'  plot(x[,,,1], reset = FALSE, axes = TRUE, main = "avoiding NAs")
 #'  plot(sf::st_geometry(dplyr::filter(p, band == 1)),
 #'       add = TRUE, pch = 19, col = "orange")
 #'
-#'  p <- random_points(x, points = pts, form = "sf") %>%
+#'  p <- random_points(x, points = pts, form = "sf") |>
 #'    dplyr::filter(band == 1)
 #'  plot(x[,,,1], reset = FALSE, axes = TRUE, main = "avoiding points")
 #'  plot(sf::st_geometry(dplyr::filter(p, band == 1)),
@@ -334,14 +321,14 @@ stars_pts_to_loc <- function(pts, x, form  = c("table", "sf")[1]){
 #'  plot(sf::st_geometry(dplyr::filter(pts, band == "b1")),
 #'       add = TRUE, pch = 1, col = "green", cex = 2)
 #'
-#'  p <- random_points(x, polygon = poly, form = "sf") %>%
+#'  p <- random_points(x, polygon = poly, form = "sf") |>
 #'    dplyr::filter(band == 1)
 #'  plot(x[,,,1], reset = FALSE, axes = TRUE, main = "within a polygon")
 #'  plot(sf::st_geometry(dplyr::filter(p, band == 1)),
 #'       add = TRUE, pch = 19, col = "orange")
 #'  plot(sf::st_geometry(poly), add = TRUE, border = "green", col = NA)
 #'
-#'  p <- random_points(x, polygon = poly, na.rm = TRUE, form = "sf") %>%
+#'  p <- random_points(x, polygon = poly, na.rm = TRUE, form = "sf") |>
 #'    dplyr::filter(band == 1)
 #'  plot(x[,,,1], reset = FALSE, axes = TRUE, main = "within a polygon avoiding NAs")
 #'  plot(sf::st_geometry(dplyr::filter(p, band == 1)),
@@ -376,10 +363,10 @@ random_points <- function(x,
       stars::read_stars(system.file("datasets/20140601-20140630-sst_slope.tif",
                                     package = "twinkle"))[,,,1:2],
       stars::read_stars(system.file("datasets/20140601-20140630-sst_cum.tif",
-                                    package = "twinkle"))[,,,1:2] ) %>%
+                                    package = "twinkle"))[,,,1:2] ) |>
       bind_stars(along = 1, nms = c("sst", "slope", "cum"))
 
-    points <- sf::read_sf(system.file("datasets/penbay-points.gpkg", package = 'twinkle')) %>%
+    points <- sf::read_sf(system.file("datasets/penbay-points.gpkg", package = 'twinkle')) |>
       dplyr::filter(layer %in% (1:2))
 
     polygon <- sf::read_sf(system.file("datasets/penbay-polygons.gpkg", package = 'twinkle'))
@@ -398,7 +385,7 @@ random_points <- function(x,
     xp <- stars::st_xy2sfc(x[,,,1], as_points = TRUE, na.rm = FALSE)
     # find which are within the polygon (note edges) as logical vector
     # convert to indices (2d cell numbers)
-    cell <- sf::st_contains(polygon, xp, sparse = FALSE)[1,] %>%
+    cell <- sf::st_contains(polygon, xp, sparse = FALSE)[1,] |>
       which()
     # propagate from cell numbers for first layer to cell numbers for all layers
     loc <- unlist(lapply(step, function(s) cell + s))
@@ -407,19 +394,19 @@ random_points <- function(x,
     }
     loc <- stars_index_to_loc(loc, x, form = "sf")
   } else {
-    loc <- sample(shape[["nindex"]], n*m, replace = FALSE) %>%
+    loc <- sample(shape[["nindex"]], n*m, replace = FALSE) |>
       stars_index_to_loc(x, form = "sf")
   }
   # now get the values for each attribute
   for (name in names(x)) {
-    loc <- loc %>%
+    loc <- loc |>
       dplyr::mutate(!!name := x[[name]][.data$index, drop = TRUE])
   }
 
   # remove NAs form consideration?
   if (na.rm){
     ix <- complete.cases(loc[[name]])
-    loc <- loc %>%
+    loc <- loc |>
       dplyr::filter(ix)
   }
 
@@ -430,9 +417,9 @@ random_points <- function(x,
     }
     ploc <- stars_pts_to_loc(points, x)
     ix <- !(loc$index %in% ploc$index)
-    loc <- loc %>%
+    loc <- loc |>
       dplyr::filter(ix)
-    #vals <- vals %>%
+    #vals <- vals |>
     #  dplyr::filter(ix)
   }
 
@@ -446,10 +433,10 @@ random_points <- function(x,
       for (name in nms){
         vnames <- colnames(x)
         ix <- grep(paste0("^",name), vnames)
-        m <- as.matrix(x %>% dplyr::as_tibble() %>% dplyr::select(vnames[ix]))
+        m <- as.matrix(x |> dplyr::as_tibble() |> dplyr::select(vnames[ix]))
 
-        x <- x %>%
-          dplyr::mutate(!!name := sapply(seq_len(nrow(m)), function(i) m[i,.data$band[i]] )) %>%
+        x <- x |>
+          dplyr::mutate(!!name := sapply(seq_len(nrow(m)), function(i) m[i,.data$band[i]] )) |>
           dplyr::select(-!!vnames[ix])
       }
     }
@@ -458,14 +445,14 @@ random_points <- function(x,
 
   # we don't need to do this if there is only one attribute
   # but it is nice to get the value at each attribute
-  loc <- loc %>%
-    #dplyr::bind_cols(vals) %>%
-    reduce_to_band(nms = names(x)) %>%
+  loc <- loc |>
+    #dplyr::bind_cols(vals) |>
+    reduce_to_band(nms = names(x)) |>
     dplyr::relocate(.data$geometry, .after = dplyr::last_col())
   if (nrow(loc) < n){
     warning("fewer than requested points sampled - try increasing value of m")
   } else {
-    loc <- loc %>%
+    loc <- loc |>
       dplyr::slice_sample(n = n, replace = FALSE)
   }
 

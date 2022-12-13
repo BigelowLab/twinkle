@@ -8,12 +8,14 @@ Title: twinkle
 Description: Tools for working with stars and simple features (sf) packages.
 Encoding: UTF-8
 Depends:
-    R (>= 3.0)
+    R (>= 4.1)
 Imports:
     stats,
+    graphics, 
     rlang,
     dplyr,
     sf,
     stars,
-    geometry
-RoxygenNote: 7.1.1
+    geometry,
+    RANN
+RoxygenNote: 7.2.2

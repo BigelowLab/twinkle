@@ -22,7 +22,7 @@ par(mfrow = c(1,3))
 for (i in seq_len(3)){
   plot(x[[i]], main = paste("Layer", i))
   plot(p, add = TRUE)
-  with(pts \%>\% dplyr::filter(layer == i), points(x, y))
+  with(pts |> dplyr::filter(layer == i), points(x, y))
 }
 }
 }

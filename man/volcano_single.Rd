@@ -5,12 +5,15 @@
 \title{Retrieve a stars object of Auckland’s Maunga Whau volcano topography.  Adapted from
 USGS-R inlmisc package.}
 \usage{
-volcano_single(indexed = FALSE, name = "values")
+volcano_single(indexed = FALSE, name = "values", threshold = NULL)
 }
 \arguments{
 \item{indexed}{logical, if TRUE then assign 1,2,3,... as cell values}
 
 \item{name}{charcater, the name to apply to the attribute}
+
+\item{threshold}{numeric or NULL, if numeric then threshold values below
+this value.  120 makes a pretty map.}
 }
 \value{
 single attribute stars

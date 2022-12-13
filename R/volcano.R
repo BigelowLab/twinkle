@@ -6,11 +6,16 @@
 #' @export
 #' @param indexed logical, if TRUE then assign 1,2,3,... as cell values
 #' @param name charcater, the name to apply to the attribute
+#' @param threshold numeric or NULL, if numeric then threshold values below
+#'   this value.  120 makes a pretty map.
 #' @return single attribute stars
-volcano_single <- function(indexed = FALSE, name = "values"){
+volcano_single <- function(indexed = FALSE, name = "values",
+                           threshold = NULL){
   crs <- "epsg:27200"
-  #m <- t(datasets::volcano)[61:1, ]
   m <- t(datasets::volcano)
+  if (!is.null(threshold)){
+    m[m < threshold] <- NA_real_
+  }
   d <- dim(m)
   if (indexed) m[] <- seq_len(prod(d))
   dx <- dy <- 10
@@ -24,9 +29,11 @@ volcano_single <- function(indexed = FALSE, name = "values"){
   s <- stars::st_as_stars(bb,
               nx = d[2],
               ny = d[1],
-              values = t(m)) %>%
+              values = t(m)) |>
     stars::st_flip(which = 2)
+  
   names(s) <- name
+  
   s
 }
 
@@ -40,25 +47,28 @@ volcano_single <- function(indexed = FALSE, name = "values"){
 #' @param what character, if "attributes" (default) then yield a \code{n}-attribute object, but 
 #'   if "bands" then yield a single attribute object with \code{n} bands
 #' @param indexed logical, if TRUE then assign 1,2,3,... as cell values
+#' @param ... other arguments for \code{\link{volcano_single}}, especially \code{threshold}.
+#'   Ignored if \code{indexed} is \code{TRUE}.
 #' @return stars class object
 volcano_multi <- function(n = 3,
                           what = c("attributes", "bands")[1],
-                          indexed = FALSE){
+                          indexed = FALSE,
+                          ...){
   v <- lapply(seq_len(n),
     function(i){
       nm <- sprintf("v%i", i)
       if (indexed){
         v <- volcano_single(indexed = TRUE, name = nm) + i
       } else {
-        v <- volcano_single(indexed = FALSE, name = nm) * runif(1, min = 0.8, max = 1.2)
+        v <- volcano_single(indexed = FALSE, name = nm, ...) * runif(1, min = 0.8, max = 1.2)
       }
       v
-    }) %>%
-    bind_stars() %>%
+    }) |>
+    bind_stars() |>
     set_names(sprintf("v%i", seq_len(n)))
   
   if (grepl("band", tolower(what[1]), fixed = TRUE)[1]){
-    v <- merge(v, name = "band") %>%
+    v <- merge(v, name = "band") |>
       set_names("v")
   }
   v
@@ -89,7 +99,7 @@ volcano_points <- function(x = volcano_multi(what = "bands"),  ...){
 #' for (i in seq_len(3)){
 #'   plot(x[[i]], main = paste("Layer", i))
 #'   plot(p, add = TRUE)
-#'   with(pts %>% dplyr::filter(layer == i), points(x, y))
+#'   with(pts |> dplyr::filter(layer == i), points(x, y))
 #' }
 #' }
 volcano_polygon <- function(){

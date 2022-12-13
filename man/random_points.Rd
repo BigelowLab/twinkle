@@ -53,13 +53,13 @@ of the \code{polygon} (if provided.)
  pts <- make_toy_points()
  poly <- make_toy_polygon()
 
- p <- random_points(x, na.rm = TRUE, form = "sf") \%>\%
+ p <- random_points(x, na.rm = TRUE, form = "sf") |>
    dplyr::filter(band == 1)
  plot(x[,,,1], reset = FALSE, axes = TRUE, main = "avoiding NAs")
  plot(sf::st_geometry(dplyr::filter(p, band == 1)),
       add = TRUE, pch = 19, col = "orange")
 
- p <- random_points(x, points = pts, form = "sf") \%>\%
+ p <- random_points(x, points = pts, form = "sf") |>
    dplyr::filter(band == 1)
  plot(x[,,,1], reset = FALSE, axes = TRUE, main = "avoiding points")
  plot(sf::st_geometry(dplyr::filter(p, band == 1)),
@@ -67,14 +67,14 @@ of the \code{polygon} (if provided.)
  plot(sf::st_geometry(dplyr::filter(pts, band == "b1")),
       add = TRUE, pch = 1, col = "green", cex = 2)
 
- p <- random_points(x, polygon = poly, form = "sf") \%>\%
+ p <- random_points(x, polygon = poly, form = "sf") |>
    dplyr::filter(band == 1)
  plot(x[,,,1], reset = FALSE, axes = TRUE, main = "within a polygon")
  plot(sf::st_geometry(dplyr::filter(p, band == 1)),
       add = TRUE, pch = 19, col = "orange")
  plot(sf::st_geometry(poly), add = TRUE, border = "green", col = NA)
 
- p <- random_points(x, polygon = poly, na.rm = TRUE, form = "sf") \%>\%
+ p <- random_points(x, polygon = poly, na.rm = TRUE, form = "sf") |>
    dplyr::filter(band == 1)
  plot(x[,,,1], reset = FALSE, axes = TRUE, main = "within a polygon avoiding NAs")
  plot(sf::st_geometry(dplyr::filter(p, band == 1)),

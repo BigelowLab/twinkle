@@ -46,13 +46,13 @@ plot(v[,,,1], axes = TRUE, reset = FALSE)
 plot(sf::st_geometry(pts), color = 'pink', 
      add = TRUE, pch = 19, cex = 0.5)
 plot(y1, col = NA, border = 'purple', add = TRUE)
-plot(sf::st_geometry(pts \%>\% dplyr::filter(grepl("1", polygon))), 
+plot(sf::st_geometry(pts |> dplyr::filter(grepl("1", polygon))), 
      pch = 1, col = 'purple', add = TRUE)
 plot(y2, col = NA, border = 'orange', add = TRUE)
-plot(sf::st_geometry(pts \%>\% dplyr::filter(grepl("2", polygon))), 
+plot(sf::st_geometry(pts |> dplyr::filter(grepl("2", polygon))), 
      pch = 2, col = 'orange', add = TRUE, cex = 1.5)
 plot(y3, col = NA, border = 'cornflowerblue', add = TRUE)
-plot(sf::st_geometry(pts \%>\% dplyr::filter(grepl("3", polygon))), 
+plot(sf::st_geometry(pts |> dplyr::filter(grepl("3", polygon))), 
      pch = 0, col = 'cornflowerblue', add = TRUE, cex = 1.5)
 }
 }

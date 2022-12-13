@@ -47,7 +47,7 @@ toy_points <- function(n = 10, nc = 10, nr = 10, nb = 5){
   y <- sample(nr-1, n, replace = TRUE) + runif(n, min = -1, max = 1)
   band <- sample(nb, n, replace = TRUE)
   
-  dplyr::tibble(id = seq_len(n), x, y, band = paste0("b", band)) %>%
+  dplyr::tibble(id = seq_len(n), x, y, band = paste0("b", band)) |>
     sf::st_as_sf(coords =  c("x", "y"))
 }
 
@@ -66,8 +66,8 @@ toy_multi <- function(nc = 10, nr = 10, nb = 5){
   lapply(idx,
          function(i) {
            m + ((i-1) * n)
-         }) %>%
-    bind_stars() %>%
-    set_names(names(idx)) %>%
+         }) |>
+    bind_stars() |>
+    set_names(names(idx)) |>
     merge(name = "band")
 }

@@ -31,9 +31,9 @@ Given a table of x and y coordinates data generate a sfc_POLYGON
    cat(str(x, "\n"))
    points_to_polygon(x, ...)
  } 
- p <- x \%>\%
-   dplyr::group_by(name) \%>\%
-   dplyr::group_map(make_one_polygon, crs = "WGS84") \%>\%
+ p <- x |>
+   dplyr::group_by(name) |>
+   dplyr::group_map(make_one_polygon, crs = "WGS84") |>
    dplyr::bind_rows()
 }m
 }

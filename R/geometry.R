@@ -63,7 +63,7 @@ st_rotate <- function(x, r = pi/2, degrees = FALSE){
   
   xg <- sf::st_geometry(x)
   xc <- sf::st_centroid(xg)
-  x %>% 
+  x |> 
     sf::st_set_geometry((xg - xc) * rot(r) + xc)
 }
 
@@ -117,8 +117,8 @@ points_to_mesh <- function(x,
                 function(i, xy = NULL, del = NULL){
                   sf::st_polygon(list(xy[del[i,],]))
                 }, xy = xy, del = d)
-    mesh <- dplyr::tibble(p1 = d[,1], p2 = d[,2], p3 = d[,3]) %>%
-      dplyr::mutate(!!geomcol := g) %>%
+    mesh <- dplyr::tibble(p1 = d[,1], p2 = d[,2], p3 = d[,3]) |>
+      dplyr::mutate(!!geomcol := g) |>
       sf::st_sf(sf_column_name = geomcol, crs = sf::st_crs(x))
     
     if (!is.null(varname)){
@@ -131,8 +131,8 @@ points_to_mesh <- function(x,
                     function(i){
                       fun(vals[d[i,]], ...)
                     })
-        mesh <- mesh %>%
-          dplyr::mutate(!!var := v) %>%
+        mesh <- mesh |>
+          dplyr::mutate(!!var := v) |>
           dplyr::relocate(!!var := v, .before = "p1")
       }
     }

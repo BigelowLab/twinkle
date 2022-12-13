@@ -6,7 +6,7 @@
 Attribute/bands 2 to \code{n} are slightly altered from the original as per
 \code{\link{volcano_single}}}
 \usage{
-volcano_multi(n = 3, what = c("attributes", "bands")[1], indexed = FALSE)
+volcano_multi(n = 3, what = c("attributes", "bands")[1], indexed = FALSE, ...)
 }
 \arguments{
 \item{n}{numeric, the number attributes (or bands)}
@@ -15,6 +15,9 @@ volcano_multi(n = 3, what = c("attributes", "bands")[1], indexed = FALSE)
 if "bands" then yield a single attribute object with \code{n} bands}
 
 \item{indexed}{logical, if TRUE then assign 1,2,3,... as cell values}
+
+\item{...}{other arguments for \code{\link{volcano_single}}, especially \code{threshold}.
+Ignored if \code{indexed} is \code{TRUE}.}
 }
 \value{
 stars class object

@@ -15,9 +15,9 @@
 #'    cat(str(x, "\n"))
 #'    points_to_polygon(x, ...)
 #'  } 
-#'  p <- x %>%
-#'    dplyr::group_by(name) %>%
-#'    dplyr::group_map(make_one_polygon, crs = "WGS84") %>%
+#'  p <- x |>
+#'    dplyr::group_by(name) |>
+#'    dplyr::group_map(make_one_polygon, crs = "WGS84") |>
 #'    dplyr::bind_rows()
 #' }m
 points_to_polygon <- function(x = dplyr::tibble(x = c(1,2,1,0), 
@@ -26,7 +26,7 @@ points_to_polygon <- function(x = dplyr::tibble(x = c(1,2,1,0),
   m <- as.matrix(x)
   n <- nrow(m)
   if (!identical(m[1,], m[n,])) m <- rbind(m, m[1,]) # close of open
-  sf::st_polygon(x = list(m)) %>% 
+  sf::st_polygon(x = list(m)) |> 
     sf::st_sfc(crs = crs)
 }
 
@@ -65,13 +65,13 @@ points_to_polygon <- function(x = dplyr::tibble(x = c(1,2,1,0),
 #' plot(sf::st_geometry(pts), color = 'pink', 
 #'      add = TRUE, pch = 19, cex = 0.5)
 #' plot(y1, col = NA, border = 'purple', add = TRUE)
-#' plot(sf::st_geometry(pts %>% dplyr::filter(grepl("1", polygon))), 
+#' plot(sf::st_geometry(pts |> dplyr::filter(grepl("1", polygon))), 
 #'      pch = 1, col = 'purple', add = TRUE)
 #' plot(y2, col = NA, border = 'orange', add = TRUE)
-#' plot(sf::st_geometry(pts %>% dplyr::filter(grepl("2", polygon))), 
+#' plot(sf::st_geometry(pts |> dplyr::filter(grepl("2", polygon))), 
 #'      pch = 2, col = 'orange', add = TRUE, cex = 1.5)
 #' plot(y3, col = NA, border = 'cornflowerblue', add = TRUE)
-#' plot(sf::st_geometry(pts %>% dplyr::filter(grepl("3", polygon))), 
+#' plot(sf::st_geometry(pts |> dplyr::filter(grepl("3", polygon))), 
 #'      pch = 0, col = 'cornflowerblue', add = TRUE, cex = 1.5)
 #' }
 match_points_to_polygons <- function(pts, poly, form = 'string'){
@@ -96,11 +96,11 @@ match_points_to_polygons <- function(pts, poly, form = 'string'){
     plot(v[,,,1], axes = TRUE, reset = FALSE)
     plot(sf::st_geometry(pts), color = 'pink', add = TRUE, pch = 19, cex = 0.5)
     plot(y1, col = NA, border = 'purple', add = TRUE)
-    plot(sf::st_geometry(pts %>% dplyr::filter(grepl("1", polygon))), pch = 1, col = 'purple', add = TRUE)
+    plot(sf::st_geometry(pts |> dplyr::filter(grepl("1", polygon))), pch = 1, col = 'purple', add = TRUE)
     plot(y2, col = NA, border = 'orange', add = TRUE)
-    plot(sf::st_geometry(pts %>% dplyr::filter(grepl("2", polygon))), pch = 2, col = 'orange', add = TRUE, cex = 1.5)
+    plot(sf::st_geometry(pts |> dplyr::filter(grepl("2", polygon))), pch = 2, col = 'orange', add = TRUE, cex = 1.5)
     plot(y3, col = NA, border = 'cornflowerblue', add = TRUE)
-    plot(sf::st_geometry(pts %>% dplyr::filter(grepl("3", polygon))), pch = 0, col = 'cornflowerblue', add = TRUE, cex = 1.5)
+    plot(sf::st_geometry(pts |> dplyr::filter(grepl("3", polygon))), pch = 0, col = 'cornflowerblue', add = TRUE, cex = 1.5)
   }
   
   to_string <- function(pts, poly){

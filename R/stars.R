@@ -1,3 +1,121 @@
+#' Make a neighborhood LUT, where each cell value contains the 1-d address of 
+#' the closest non-missing cell (which might be itself). 
+#' 
+#' @export
+#' @param x stars object, only the first layer of the first attribute is used.
+#' @param mask_value numeric, the value of masked areas, by default NA
+#' @param nonreassigned_value either "cellnumber" which indicates cell number should be used
+#'        or some numeric value like NA. 
+#' @return stars of cell addresses.  Where the input, x, had non-mask values the
+#'   cell addresses point to the input cell.  Where the input had mask-valued cells,
+#'   the output cell addresses point to the nearest non-mask cells in the input.
+#' @examples
+#' \dontrun{
+#' library(stars)
+#' library(twinkle)
+#' library(dplyr)
+#' v = volcano_single() |> 
+#'   dplyr::mutate(values = dplyr::case_when(values < 120 ~ NA_real_,  
+#'                                           values >= 120 ~ values))
+#' lut <- make_raster_lut(mask)
+#' z <- c(mask, lut)
+#' names(z) <- c("mask", "lut")
+#' plot(z)
+#' }
+make_raster_lut <- function(x, mask_value = NA_real_, 
+                            nonreassigned_value = "cellnumber"){
+  
+  lut <- x[1,,,1]
+  
+  
+}
+
+
+
+#' A wrapper around base::findInterval() that allows decreasing values in the
+#' value of the vector within which we wish to place values of x.
+#'
+#' When \code{vec} is in ascending order we use \code{base::findInterval()}, but
+#' when \code{vec} is in descending order we implement an adaptation of the
+#' \code{locate()} function from Numerical Recipes for C \url{http://apps.nrbook.com/c/index.html}
+#'
+#' @export
+#' @param x numeric values we wish to located within \code{vec}
+#' @param vec numeric vector of sorted values (ascending or descending order)
+#'    within which we wish to find the placement of \code{x}
+#' @param rightmost.closed see \link{findInterval}
+#' @param all.inside see \link{findInterval}
+#' @return see \link{findInterval}
+find_interval <- function(x, vec, rightmost.closed = FALSE, all.inside = FALSE){
+
+  # locate one value of x within v
+  # @param v ordered numeric vector
+  # @param x one numeric lo locate within v
+  # @return index into v
+  locate_one <- function(v, x){
+    n <- length(v)
+    ascnd <- v[n] >= v[1]
+    iL <- 1
+    iU <- n
+    while((iU-iL) > 1){
+      iM <- bitwShiftR((iU+iL),1)
+      if (ascnd){
+        if (x >= v[iM]){
+          iL <- iM
+        } else {
+          iU <- iM
+        }
+      } else {
+        if (x <= v[iM]){
+          iL <- iM
+        } else {
+          iU <- iM
+        }
+      }
+    }
+
+    if (ascnd) {
+      if ( val < v[1]) {
+        index <- 0
+      } else if (x >= v[n]) {
+        index <- n
+      } else {
+        index <- iL
+      }
+    } else {
+      if ( x > v[1]) {
+        index <- 0
+      } else if (x <= vec[n]) {
+        index <- n
+      } else {
+        index <- iL
+      }
+    }
+    return(index)
+  }  # locate_one
+
+  ascending <- vec[length(vec)] >= vec[1]
+
+  if (!ascending) {
+    # here we do our own implementation (with a performance hit)
+    j <- sapply(x, function(x, v=NULL) locate_one(v,x), v = vec)
+    nv <- length(vec)
+    if (all.inside){
+      j[j < 1] <- 1
+      j[j >= nv] <- nv - 1
+    }
+    if (rightmost.closed){
+      j[x <= vec[nv]] <- nv - 1
+    }
+  } else {
+    # this is plain vanilla stuff we pass to findInterval
+    j <- base::findInterval(x, vec,
+                            rightmost.closed = rightmost.closed, all.inside = all.inside)
+  }
+  j
+}  # find_interval
+
+
 #' Test is an object inherits from \code{stars} class
 #'
 #' @export
@@ -77,7 +195,7 @@ delta_stars <- function(x){
 #' @return \code{stars} objects
 bind_stars <- function(x, nms = names(x), ...){
   y <- do.call(c, x)
-  if (is.null(names)) names <- paste("b", seq_len(length(x)))
+  if (is.null(nms)) nms <- paste("b", seq_len(length(x)))
   names(y) <- nms
   y
 }
@@ -143,6 +261,16 @@ stars_pts_to_loc <- function(pts, x, form  = c("table", "sf")[1]){
     stop("Input pts must have a variable that matches the name of the band dimension")
   }
   shape <- shape_stars(x)
+  if (FALSE){
+    xy <- sf::st_coordinates(pts) %>%
+      dplyr::as_tibble()
+    xv <- stars::st_get_dimension_values(x, which = 1)
+    yv <- stars::st_get_dimension_values(x, which = 2)
+    ix <- findInterval(xy$X, xv)
+    iy <- (xy$Y <= yv & xy$Y > yv) %>% which()
+    zv <- stars::st_get_dimension_values(x, which = bandname)
+
+  }
 
   xp <- stars::st_xy2sfc(x[,,,1], as_points = FALSE, na.rm = FALSE)
   cell <- sf::st_intersects(sf::st_geometry(pts), sf::st_geometry(xp)) %>%
@@ -282,29 +410,30 @@ random_points <- function(x,
     loc <- sample(shape[["nindex"]], n*m, replace = FALSE) %>%
       stars_index_to_loc(x, form = "sf")
   }
-  # now get the values
-  vals <- stars::st_extract(x, loc) %>%
-    sf::st_as_sf() %>%
-    dplyr::as_tibble() %>%
-    dplyr::select(-.data$geometry)
+  # now get the values for each attribute
+  for (name in names(x)) {
+    loc <- loc %>%
+      dplyr::mutate(!!name := x[[name]][.data$index, drop = TRUE])
+  }
 
   # remove NAs form consideration?
   if (na.rm){
-    ix <- complete.cases(vals)
+    ix <- complete.cases(loc[[name]])
     loc <- loc %>%
-      dplyr::filter(ix)
-    vals <- vals %>%
       dplyr::filter(ix)
   }
 
   # points to avoid?
   if (!is.null(points)){
+    if (!inherits(points, "sf")) {
+      points <- sf::st_as_sf(points, coords = c("x", "y"), crs = sf::st_crs(x))
+    }
     ploc <- stars_pts_to_loc(points, x)
     ix <- !(loc$index %in% ploc$index)
     loc <- loc %>%
       dplyr::filter(ix)
-    vals <- vals %>%
-      dplyr::filter(ix)
+    #vals <- vals %>%
+    #  dplyr::filter(ix)
   }
 
   reduce_to_band <- function(x, nms = names(x)){
@@ -327,9 +456,10 @@ random_points <- function(x,
     x
   }
 
-
+  # we don't need to do this if there is only one attribute
+  # but it is nice to get the value at each attribute
   loc <- loc %>%
-    dplyr::bind_cols(vals) %>%
+    #dplyr::bind_cols(vals) %>%
     reduce_to_band(nms = names(x)) %>%
     dplyr::relocate(.data$geometry, .after = dplyr::last_col())
   if (nrow(loc) < n){

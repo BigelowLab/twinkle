@@ -4,7 +4,7 @@ Author: Ben Tupper <btupper@bigelow.org>
 URL: https://github.com/bigelowlab/twinkle
 Version: 0.1
 License: MIT + file LICENSE
-Title: rasf
+Title: twinkle
 Description: Tools for working with stars and simple features (sf) packages.
 Encoding: UTF-8
 Depends:

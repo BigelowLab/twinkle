@@ -4,6 +4,6 @@
 #' @docType package
 #' @name twinkle
 #' @importFrom dplyr %>%
-#' @importFrom rlang .data := !!
+#' @importFrom rlang .data := !! set_names
 #' @importFrom stats complete.cases runif setNames
 NULL

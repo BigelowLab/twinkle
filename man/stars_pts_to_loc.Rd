@@ -5,7 +5,11 @@
 \title{Convert a sf POINTS object with a band variable into stars object to row, col,
 cell x, y, and band location coordinates (cell centers).}
 \usage{
-stars_pts_to_loc(pts, x, form = c("table", "sf")[1])
+stars_pts_to_loc(
+  pts = dplyr::select(stars_index_to_loc(form = "sf"), dplyr::all_of("band")),
+  x = toy_multi(nb = 3, nc = 5, nr = 4, mask = FALSE),
+  form = c("table", "sf")[1]
+)
 }
 \arguments{
 \item{pts}{sf POINT object with one variable whose name matches the name of the band dimension

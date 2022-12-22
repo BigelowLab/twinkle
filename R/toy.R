@@ -1,21 +1,3 @@
-#' Create a lightweight toy \code{stars} object
-#'
-#' @export
-#' @param nc integer, number of columns
-#' @param nr integer, number of rows
-#' @return stars mask with NA values assigned to area to be masked
-toy_mask <- function(nc = 10, nr = 10){
-  m <- matrix(seq_len(nc*nr), ncol = nc, nrow = nr, byrow = TRUE)
-  m[lower.tri(m)] <- NA
-  m <- t(m)
-  bb <- sf::st_bbox(c(xmin = 0, xmax = 10, ymin = 0, ymax = 10))
-  x <- stars::st_as_stars(bb,
-                          nx = 10,
-                          ny = 10,
-                          inside = FALSE,
-                          values = m)
-}
-
 #' Create a polygon object suitable for use with the toy object
 #' 
 #' @export
@@ -51,23 +33,35 @@ toy_points <- function(n = 10, nc = 10, nr = 10, nb = 5){
     sf::st_as_sf(coords =  c("x", "y"))
 }
 
+#' Create a single band toy \code{stars} object
+#' 
+#' @seealso [Example from introduction](https://r-spatial.github.io/stars/articles/stars4.html#regular-grids)
+#' @export
+#' @param nc integer, number of columns
+#' @param nr integer, number of rows
+#' @param mask logical, if TRUE mask the lower left portion
+#' @return stars object with regions masked
+toy_single <- function(nc = 10, nr = 10, mask = FALSE){
+  m <- matrix(seq_len(nc*nr), ncol = nc, nrow = nr)
+  if (mask) m[lower.tri(m)] <- NA
+  dim(m) = c(x = nr, y = nc)
+  stars::st_as_stars(m) |>
+    rlang::set_names("values")
+}
+
 #' Create a lightweight toy \code{stars} object
 #'
 #' @export
 #' @param nc integer, number of columns
 #' @param nr integer, number of rows
 #' @param nb integer, number of bands
+#' @param ... besides \code{along}, other arguments for \code{\link[stars]{c.stars}} 
 #' @return stars object with regions masked
-toy_multi <- function(nc = 10, nr = 10, nb = 5){
-  m <- toy_mask(nc = nc, nr = nr)
-  n <- nc * nr
-  idx <- seq_len(nb)
-  names(idx) <- paste0("b", idx)
-  lapply(idx,
-         function(i) {
-           m + ((i-1) * n)
-         }) |>
-    bind_stars() |>
-    set_names(names(idx)) |>
-    merge(name = "band")
+toy_multi <- function(nc = 10, nr = 10, nb = 5, ...){
+  lapply(seq_len(nb),
+         function(i, n = 1, ...){
+           toy_single(nc = nc, nr = nr, ...) |>
+             dplyr::mutate(values = .data$values +  ((i-1) * n))
+         }, n = nr * nc, ...) |>
+    bind_bands()
 }

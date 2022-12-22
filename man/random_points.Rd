@@ -5,7 +5,7 @@
 \title{Generate random points within a stars object.}
 \usage{
 random_points(
-  x,
+  x = volcano_multi(what = "bands", threshold = 120),
   n = 100,
   m = 2,
   na.rm = FALSE,
@@ -49,38 +49,47 @@ of the \code{polygon} (if provided.)
 }
 \examples{
 \dontrun{
- x <- make_toy()
- pts <- make_toy_points()
- poly <- make_toy_polygon()
+# generate a multiband array, points and a polygon
+set.seed(1)
+x <- volcano_multi(what = 'bands', threshold = 120)
+pts <- volcano_points(x, n = 30)
+poly <- volcano_polygon()
 
- p <- random_points(x, na.rm = TRUE, form = "sf") |>
-   dplyr::filter(band == 1)
- plot(x[,,,1], reset = FALSE, axes = TRUE, main = "avoiding NAs")
- plot(sf::st_geometry(dplyr::filter(p, band == 1)),
-      add = TRUE, pch = 19, col = "orange")
+# generate random points across layers that avoid where the array values are missing
+p <- random_points(x, na.rm = TRUE, n = 30, form = "sf") |>
+  dplyr::filter(band == 1)
+plot(x[,,,1], reset = FALSE, axes = TRUE, main = "avoiding NAs")
+plot(sf::st_geometry(dplyr::filter(p, band == 1)),
+     add = TRUE, pch = 19, col = "orange")
 
- p <- random_points(x, points = pts, form = "sf") |>
-   dplyr::filter(band == 1)
- plot(x[,,,1], reset = FALSE, axes = TRUE, main = "avoiding points")
- plot(sf::st_geometry(dplyr::filter(p, band == 1)),
-      add = TRUE, pch = 19, col = "orange")
- plot(sf::st_geometry(dplyr::filter(pts, band == "b1")),
-      add = TRUE, pch = 1, col = "green", cex = 2)
+# generate random points that avoid other known points
+p <- random_points(x, points = pts, form = "sf", n = 30) |>
+  dplyr::filter(band == 1)
+plot(x[,,,1], reset = FALSE, axes = TRUE, main = "avoiding points")
+plot(sf::st_geometry(dplyr::filter(p, band == 1)),
+     add = TRUE, pch = 19, col = "orange")
+plot(sf::st_geometry(dplyr::filter(pts, band == "1")),
+     add = TRUE, pch = 15, col = "green")
 
- p <- random_points(x, polygon = poly, form = "sf") |>
-   dplyr::filter(band == 1)
- plot(x[,,,1], reset = FALSE, axes = TRUE, main = "within a polygon")
- plot(sf::st_geometry(dplyr::filter(p, band == 1)),
-      add = TRUE, pch = 19, col = "orange")
- plot(sf::st_geometry(poly), add = TRUE, border = "green", col = NA)
+# generate points within a polygon
+set.seed(2)
+p <- random_points(x, polygon = poly, form = "sf", n = 30) |>
+  dplyr::filter(band == 1)
+plot(x[,,,1], reset = FALSE, axes = TRUE, main = "within a polygon")
+plot(sf::st_geometry(dplyr::filter(p, band == 1)),
+     add = TRUE, pch = 19, col = "orange")
+plot(sf::st_geometry(poly), add = TRUE, border = "green", col = NA)
 
- p <- random_points(x, polygon = poly, na.rm = TRUE, form = "sf") |>
-   dplyr::filter(band == 1)
- plot(x[,,,1], reset = FALSE, axes = TRUE, main = "within a polygon avoiding NAs")
- plot(sf::st_geometry(dplyr::filter(p, band == 1)),
-      add = TRUE, pch = 19, col = "orange")
- plot(sf::st_geometry(poly),
-      add = TRUE, border = "green", col = NA)
+# generate points within a polygon that also avoid NAs
+# first, nudge the polygon to lower right
+poly = twinkle::st_translate(poly, d=c(100, -100))
+p <- random_points(x, polygon = poly, na.rm = TRUE, form = "sf") |>
+  dplyr::filter(band == 1)
+plot(x[,,,1], reset = FALSE, axes = TRUE, main = "within a polygon avoiding NAs")
+plot(sf::st_geometry(dplyr::filter(p, band == 1)),
+     add = TRUE, pch = 19, col = "orange")
+plot(sf::st_geometry(poly),
+     add = TRUE, border = "green", col = NA)
 
 }
 }

@@ -4,7 +4,7 @@
 \alias{toy_multi}
 \title{Create a lightweight toy \code{stars} object}
 \usage{
-toy_multi(nc = 10, nr = 10, nb = 5)
+toy_multi(nc = 10, nr = 10, nb = 5, ...)
 }
 \arguments{
 \item{nc}{integer, number of columns}
@@ -12,6 +12,8 @@ toy_multi(nc = 10, nr = 10, nb = 5)
 \item{nr}{integer, number of rows}
 
 \item{nb}{integer, number of bands}
+
+\item{...}{besides \code{along}, other arguments for \code{\link[stars]{c.stars}}}
 }
 \value{
 stars object with regions masked

@@ -5,10 +5,14 @@
 \title{Convert a index (1, 2, 3,..., ncells*nbands) into stars obeject to row, col, cell and
    band location coordinates}
 \usage{
-stars_index_to_loc(index, x, form = c("table", "sf")[1])
+stars_index_to_loc(
+  index = c(12L, 14L, 19L, 21L, 23L, 37L, 46L, 56L, 58L, 59L),
+  x = toy_multi(nb = 3, nc = 5, nr = 4, mask = FALSE),
+  form = c("table", "sf")[1]
+)
 }
 \arguments{
-\item{index}{vector of multi-band index coordinates}
+\item{index}{vector of multi-band index coordinates (1-d addresses into n-d space)}
 
 \item{x}{stars object}
 
@@ -21,8 +25,8 @@ a tibble of index, cell, col, row, x, y, and band
  \item{cell, 1-based 2d index into each band as if a matrix}
  \item{col, 1-based column index}
  \item{row, 1-based row index}
- \item{x, coordinate of center of cell, missing if \code{form} is 'sf'}
- \item{y, coordinate of center of cell, missing if \code{form} is 'sf'}
+ \item{x, coordinate of center of cell, part of \code{geometry} if \code{form} is 'sf'}
+ \item{y, coordinate of center of cell, part of \code{geometry} if \code{form} is 'sf'}
  \item{band, 1-based integer index of band}
 }
 }

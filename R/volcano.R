@@ -64,7 +64,7 @@ volcano_multi <- function(n = 3,
       }
       v
     }) |>
-    bind_stars() |>
+    bind_attrs() |>
     set_names(sprintf("v%i", seq_len(n)))
   
   if (grepl("band", tolower(what[1]), fixed = TRUE)[1]){

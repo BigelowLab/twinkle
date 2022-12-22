@@ -27,7 +27,7 @@ Assemble a vector of stars dimension or shape
 \dontrun{
 v <- volcano_multi(what = 'bands')
 shape_stars(v)
-v2 <- bind_stars(v, v)
+v2 <- bind_attrs(v, v)
 shape_stars(v2)
 }
 }

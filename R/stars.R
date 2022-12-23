@@ -289,9 +289,15 @@ stars_pts_to_loc <- function(pts = stars_index_to_loc(form = 'sf') |>
 
   if (!is_stars(x)) stop("Input x must be a stars class")
   # In theory we don't know it is third, but we don't have access to st_upfront
-  bandname <- names(dim(x))[3]
-  if(!(bandname %in% names(pts))) {
-    stop("Input pts must have a variable that matches the name of the band dimension:", bandname)
+  xbandname <- names(dim(x))[3]
+  if(!(xbandname %in% names(pts))) {
+    if ("band" %in% names(pts)) {
+      pbandname = "band"
+    } else {
+      stop("Input pts must have a variable that matches 'band' or the name of the x band dimension:", xbandname)
+    }
+  } else {
+    pbandname = xbandname
   }
   
   shape <- shape_stars(x)
@@ -299,15 +305,11 @@ stars_pts_to_loc <- function(pts = stars_index_to_loc(form = 'sf') |>
   xp <- stars::st_xy2sfc(x[,,,1], as_points = FALSE, na.rm = FALSE)
   cell <- sf::st_intersects(sf::st_geometry(pts), sf::st_geometry(xp)) |>
     unlist()
-  bandvals <- stars::st_get_dimension_values(x, which = bandname)
+  bandvals <- stars::st_get_dimension_values(x, which = xbandname)
   
-  if (bandname !%in% )
-  
-  band <- match(pts[[bandname]], bandvals)
+  band <- match(pts[[pbandname]], bandvals)
   step <- (band - 1) * shape[['ncell']]
   index <- cell + step
-  #col   <- ((cell-1) %% shape[['ncol']])  + 1
-  #row   <- floor((cell - 1) / shape[['ncol']]) + 1
   colrow <- colrow_from_cells(x, cell)
   xv <- stars::st_get_dimension_values(x, which = 1)[colrow[,1, drop = TRUE]]
   yv <- stars::st_get_dimension_values(x, which = 2)[colrow[,2, drop = TRUE]]

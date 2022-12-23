@@ -5,5 +5,5 @@
 #' @name twinkle
 #' @importFrom graphics par
 #' @importFrom rlang .data := !! set_names
-#' @importFrom stats complete.cases runif
+#' @importFrom stats complete.cases runif na.omit
 NULL

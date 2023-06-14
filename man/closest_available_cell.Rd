@@ -4,7 +4,11 @@
 \alias{closest_available_cell}
 \title{Determine the closest non-NA pixel given [lon,lat] and a lut raster}
 \usage{
-closest_available_cell(x = volcano_points(), lut = make_raster_lut())
+closest_available_cell(
+  x = volcano_points(),
+  lut = make_raster_lut(),
+  verbose = FALSE
+)
 }
 \arguments{
 \item{x}{sf POINT data, data.frame or with [lon,lat] coordinates in that order 
@@ -12,6 +16,8 @@ and assumed to be aligned with the CRS of the \code{lut}}
 
 \item{lut}{stars object, look-up with precomputed closest non-NA cells. 
 See \code{\link{make_raster_lut}}}
+
+\item{verbose}{logical, if TRUE output messages}
 }
 \value{
 sf object with two attributes \code{index} (the index of the closets non-NA point)

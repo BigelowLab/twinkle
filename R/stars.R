@@ -49,12 +49,14 @@ mplot <- function(x = volcano_multi(threshold = 120),
 #'  and assumed to be aligned with the CRS of the \code{lut}
 #' @param lut stars object, look-up with precomputed closest non-NA cells. 
 #'   See \code{\link{make_raster_lut}}
+#' @param verbose logical, if TRUE output messages
 #' @return sf object with two attributes \code{index} (the index of the closets non-NA point)
 #'   and \code{original} (the original index)
-closest_available_cell <- function(x = volcano_points(), lut = make_raster_lut()){
+closest_available_cell <- function(x = volcano_points(), lut = make_raster_lut(),
+                                   verbose = FALSE){
   
   if (!inherits(x, c("sf", "sfc"))){
-    message("converting x to sf using lut's CRS")
+    if (verbose) message("converting x to sf using lut's CRS")
     if (inherits(x, "matrix")){
       x <- as.data.frame(x[,1:2])
     }
@@ -302,9 +304,10 @@ stars_pts_to_loc <- function(pts = stars_index_to_loc(form = 'sf') |>
   
   shape <- shape_stars(x)
 
-  xp <- stars::st_xy2sfc(x[,,,1], as_points = FALSE, na.rm = FALSE)
-  cell <- sf::st_intersects(sf::st_geometry(pts), sf::st_geometry(xp)) |>
-    unlist()
+  #xp <- stars::st_xy2sfc(x[,,,1], as_points = FALSE, na.rm = FALSE)
+  #cell <- sf::st_intersects(sf::st_geometry(pts), sf::st_geometry(xp)) |>
+  #  unlist()
+  cell <- stars::st_cells(x, pts)
   bandvals <- stars::st_get_dimension_values(x, which = xbandname)
   
   band <- match(pts[[pbandname]], bandvals)

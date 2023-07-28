@@ -1,5 +1,72 @@
+#' Mask a stars object with a polygon
+#' 
+#'  You can use st_crop(...) but it runs slowly for large rasters
+#'  
+#' @seealso https://github.com/r-spatial/stars/issues/622
+#' 
+#' @export
+#' @param x stars object
+#' @param y sf polygon object.  Pixels exterior of this as assigned NA
+#' @param filename character or NA, if a filename write to the file
+#' @param invert logical, if TRUE values inside the polygon are set to NA
+#' @return a masked stars object, areas outside (or possibly inside) are set to NA
+#'   depending upon the value of \code{invert}.  Default is outside is NA
+#' @examples
+#' \dontrun{
+#'   library(stars)
+#'   library(sf)
+#'   x = read_stars(system.file("tif/L7_ETMs.tif", package = "stars")) 
+#'   m = cbind(c(290000, 295000, 292500, 290000),
+#'             c(9113000, 9115000, 9118000, 9113000))
+#'   p = st_sfc( st_polygon(list(m)) ) |> 
+#'     st_set_crs(31985)
+#'   m = mask_stars(x, p)
+#'   plot_p = function() plot(p, add = TRUE, border = 'orange')
+#'   z = c(x,m, along = 'band')
+#'   plot(z, hook = plot_p)
+#' }
+mask_stars = function(x, y, invert = FALSE, filename = NA){
+  
+  starsfile = tempfile(fileext = ".tif")
+  polyfile = tempfile(fileext = ".gpkg")
+  resultfile = if(is.na(filename[1])){
+      tempfile(fileext = ".tif")
+    } else {
+      filename[1]
+    }
+  
+  all_one = function(x) {
+    x[[1]] = 1
+    x
+  }
+    
+  stars::write_stars(all_one(dplyr::select(x,1)), starsfile)
+  sf::write_sf(sf::st_geometry(y), polyfile)
+  
+  ok = sf::gdal_utils(util = "warp", 
+                      source = starsfile, 
+                      destination = resultfile, 
+                      options = c("-cutline", polyfile))
+  if (!ok) return(NULL)
+  result = stars::read_stars(resultfile)
+  # not the subtle switch from result back to x
+  ix <- result[[1]] > 0
+  if (invert) ix = !ix
+                    
+  result = 0
+  
+  for (n in names(x)) x[[n]][!ix] <- NA_real_
 
-
+  if (is.na(filename)) {
+    ok = file.remove(resultfile)
+  } else {
+    stars::write_stars(x, resultfile)
+  }
+  
+  ok = file.remove(starsfile, polyfile)
+  
+  x
+}
 
 #' Plot multiple attributes of a stars object
 #' 

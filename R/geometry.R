@@ -1,5 +1,5 @@
-#' Translate a simple feature 
-#' 
+#' Translate a simple feature
+#'
 #' @seealso https://r-spatial.github.io/sf/articles/sf3.html#affine-transformations-1
 #' @param x sf object
 #' @param d numeric, values to translate by in order of [x, y]
@@ -15,7 +15,7 @@
 #'   plot(sf::st_geometry(x2), add = TRUE, border = "orange", col = NA, lwd = 3)
 #' }
 st_translate <- function(x, d = c(0,0)){
-  
+
   if (FALSE){
     v <- volcano_multi(what = 'bands')
     x <-  volcano_polygon()
@@ -29,11 +29,12 @@ st_translate <- function(x, d = c(0,0)){
 }
 
 
-#' Rotate a simple feature 
-#' 
+#' Rotate a simple feature
+#'
 #' @seealso https://r-spatial.github.io/sf/articles/sf3.html#affine-transformations-1
 #' @param x sf object
-#' @param r numeric, radians (or degrees) to rotate
+#' @param r numeric, radians (or degrees) to rotate.  Must be of length 1 (in
+#'   which case the value is recycled) or length equal to the number of rows in \code{x}
 #' @param degrees logical, if TRUE intepret \code{r} as degrees instead of radians
 #' @return a rotated version of the input \code{x}
 #' @export
@@ -47,7 +48,7 @@ st_translate <- function(x, d = c(0,0)){
 #'  plot(sf::st_geometry(x2), add = TRUE, border = "orange", col = NA, lwd = 3)
 #' }
 st_rotate <- function(x, r = pi/2, degrees = FALSE){
-  
+
   if (FALSE){
     v <- volcano_multi(what = 'bands')
     x <-  volcano_polygon()
@@ -56,15 +57,30 @@ st_rotate <- function(x, r = pi/2, degrees = FALSE){
     plot(sf::st_geometry(x), add = TRUE, border = "purple", col = NA, lwd = 3)
     plot(sf::st_geometry(x2), add = TRUE, border = "orange", col = NA, lwd = 3)
   }
-  
+
+  nr = length(r)
+  nx = nrow(x)
+  if( (nr > 1) && (nr == nx)) {
+    x = lapply(seq_len(length(r)),
+               function(i){
+                 st_rotate(dplyr::slice(x, i), r[i], degrees = degrees)
+               }) |>
+      dplyr::bind_rows()
+    return(x)
+  } else if (nr != 1) {
+    stop("r must have length 1 or must match the number of rows in x")
+  }
+
   if (degrees) r <- r * (pi/180)
-  
+
   rot <- function(a) matrix(c(cos(a), sin(a), -sin(a), cos(a)), 2, 2)
-  
+
   xg <- sf::st_geometry(x)
   xc <- sf::st_centroid(xg)
-  x |> 
-    sf::st_set_geometry((xg - xc) * rot(r) + xc)
+  crs = sf::st_crs(x)
+  x |>
+    sf::st_set_geometry((xg - xc) * rot(r) + xc) |>
+    sf::st_set_crs(crs)
 }
 
 #' Convert sfc_POINTS to a mesh of polygons (delaunay triangulation)
@@ -91,10 +107,10 @@ st_rotate <- function(x, r = pi/2, degrees = FALSE){
 #'      add.geom = list(sf::st_geometry(pts), col = 'orange', pch = 19))
 #' plot(sf::st_geometry(mesh), add = TRUE, border = 'green')
 #' }
-points_to_mesh <- function(x, 
+points_to_mesh <- function(x,
                            method = c("geometry", "sf")[1],
                            varname = NULL, fun = mean, ...){
-  
+
   if (FALSE){
     pts <- sf::read_sf(system.file("datasets/penbay-points.gpkg", package = 'twinkle'))
     mesh <- points_to_mesh(pts)
@@ -105,7 +121,7 @@ points_to_mesh <- function(x,
       add.geom = list(sf::st_geometry(pts), col = 'blue', pch = 19))
     plot(sf::st_geometry(mesh), add = TRUE, border = 'orange')
   }
-  
+
   if (tolower(method[1]) == 'sf'){
     mesh <- sf::st_triangulate(sf::st_union(x), ...)
   } else {
@@ -120,7 +136,7 @@ points_to_mesh <- function(x,
     mesh <- dplyr::tibble(p1 = d[,1], p2 = d[,2], p3 = d[,3]) |>
       dplyr::mutate(!!geomcol := g) |>
       sf::st_sf(sf_column_name = geomcol, crs = sf::st_crs(x))
-    
+
     if (!is.null(varname)){
       stopifnot(all(varname %in% colnames(x)))
       d <- d[,1:3]  # revert to the original m polygons by 3 nodes
@@ -158,18 +174,18 @@ points_to_mesh <- function(x,
 #' plot(sf::st_geometry(ch), add = TRUE, border = 'orange', lwd = 2, col = NA)
 #' }
 points_to_convexhull <- function(x){
-  
+
   if (FALSE){
     pts <- sf::read_sf(system.file("datasets/penbay-points.gpkg", package = 'twinkle'))
     chull <- points_to_convexhull(pts)
     sst <- stars::read_stars(system.file("datasets/20140601-20140630-sst.tif", package = "twinkle"))
     plot(sst[,,,1],
          main = "sst 2014-01-01",
-         key.pos = NULL, 
+         key.pos = NULL,
          reset = FALSE,
          add.geom = list(sf::st_geometry(pts), col = 'blue', pch = 19))
     plot(sf::st_geometry(chull), add = TRUE, border = 'orange', lwd = 2, col = NA)
   }
-  
+
   sf::st_convex_hull(sf::st_union(x))
 }

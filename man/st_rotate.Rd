@@ -9,7 +9,8 @@ st_rotate(x, r = pi/2, degrees = FALSE)
 \arguments{
 \item{x}{sf object}
 
-\item{r}{numeric, radians (or degrees) to rotate}
+\item{r}{numeric, radians (or degrees) to rotate.  Must be of length 1 (in
+which case the value is recycled) or length equal to the number of rows in \code{x}}
 
 \item{degrees}{logical, if TRUE intepret \code{r} as degrees instead of radians}
 }

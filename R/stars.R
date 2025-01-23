@@ -608,3 +608,62 @@ st_xy_from_cells <- function(x = toy_single(),
   sf::st_as_sf(coords = c("x", "y"), crs = sf::st_crs(x))
 }
 
+#' A diagnostic tool for comparing the dimensionality of two stars objects 
+#'
+#' @export
+#' @param x `stars` or `dimensions` object
+#' @param y another `stars` or `dimensions` object
+#' @param tolerance num, see [base::all.equal]
+#' @param ignore_resolution logival, if TRUE ignore resolution
+#' @return logical, TRUE if the objects are compatable with [stars::c.stars]
+combine_ready = function(x, y, 
+												 tolerance = 0, 
+												 ignore_resolution = FALSE){
+	if (inherits(x, "stars")) {
+		x = stars::st_dimensions(x)
+	} else if (!inherits(x, "dimensions")){
+		stop("x must be `stars` or `dimensions` object")
+	}
+	if (inherits(y, "stars")) {
+		y = stars::st_dimensions(y)
+	} else if (!inherits(y, "dimensions")){
+		stop("y must be `stars` or `dimensions` object")
+	}
+	
+	compatico = TRUE
+	if (length(x) != length(y)){
+		message(sprintf("x has %i dims while y has %i", length(dimx), length(dimy)))
+		return(!compatico)
+	}
+	
+	if (!all(names(x) %in% names(y))){
+		message(sprintf("x has [%s] dims while y has [%s]"),
+						paste(names(x, collapse = ",")),
+						paste(names(y, collapse = ",")))
+		return(!compatico)
+	}
+	
+	if (sf::st_crs(x) != sf::st_crs(y)){
+		message("x and y have differing CRS values")
+		return(!compatico)
+	}
+	
+	sf::st_crs(x) = sf::st_crs(y) <- NA_crs_
+	
+	for (nm in names(x)){
+		dx = x[[nm]]
+		dy = y[[nm]]
+		if (ignore_resolution){
+			dx$delta <- dx$to <- NA_real_
+			dy$delta <- dy$to <- NA_real_
+		}
+		test = all.equal(dx, dy, tolerance = tolerance, check_attributes = FALSE)
+		if (!isTRUE(test)){
+			message("x and y differ along dimension: ", nm)
+			print(test)
+			compatico = FALSE
+		}
+	}
+
+	return(compatico)
+}

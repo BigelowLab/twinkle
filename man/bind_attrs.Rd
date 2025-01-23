@@ -4,11 +4,13 @@
 \alias{bind_attrs}
 \title{Bind a list of \code{stars} objects by attribute.}
 \usage{
-bind_attrs(x)
+bind_attrs(x, ...)
 }
 \arguments{
 \item{x}{list of one or more \code{stars} objects.  Any NULL elements are
 silently removed first.}
+
+\item{other}{arguments for c.stars()}
 }
 \value{
 \code{stars} objects

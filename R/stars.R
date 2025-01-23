@@ -276,12 +276,13 @@ delta_stars <- function(x){
 #' @export
 #' @param x list of one or more \code{stars} objects.  Any NULL elements are
 #'   silently removed first.
+#' @param other arguments for c.stars()
 #' @return \code{stars} objects
-bind_attrs <- function(x){
+bind_attrs <- function(x, ...){
   # remove any null entries
   x = x[!sapply(x, is.null)]
   if (length(x) == 0) stop("input has zero length")
-  do.call(c, append(x, list(along = NA_integer_)))
+  do.call(c, append(x, list(along = NA_integer_, ...)))
 }
 
 

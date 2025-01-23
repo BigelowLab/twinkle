@@ -2,8 +2,16 @@
 % Please edit documentation in R/twinkle-package.R
 \docType{package}
 \name{twinkle}
+\alias{twinkle-package}
 \alias{twinkle}
 \title{twinkle: Tools for working with [https://CRAN.R-project.org/package=stars] and [simple features](https://CRAN.R-project.org/package=sf).}
 \description{
 Tools for working with [https://CRAN.R-project.org/package=stars] and [simple features](https://CRAN.R-project.org/package=sf).
+}
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://github.com/bigelowlab/twinkle}
+}
+
 }

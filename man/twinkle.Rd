@@ -15,3 +15,12 @@ Useful links:
 }
 
 }
+\author{
+\strong{Maintainer}: Tupper Ben \email{btupper@bigelow.org}
+
+Other contributors:
+\itemize{
+  \item Oliveira Kyle \email{koliveira@bigelow.org} [contributor]
+}
+
+}

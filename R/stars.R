@@ -130,8 +130,10 @@ closest_available_cell <- function(x = volcano_points(), lut = make_raster_lut()
     x <- sf::st_as_sf(x, coords = c(1,2), crs = sf::st_crs(lut))
   }
   
-  index <- stars::st_extract(lut, at = x) |>
-    dplyr::mutate(original = stars::st_cells(lut, x), .after = 1)
+  index <- stars::st_extract(lut, at = x)
+  index = dplyr::mutate(index, 
+  											original = stars::st_cells(lut, x), .after = 1)
+  index
   
 }
 

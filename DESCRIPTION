@@ -1,6 +1,7 @@
 Package: twinkle
-Maintainer: Ben Tupper <btupper@bigelow.org>
-Author: Ben Tupper <btupper@bigelow.org>
+Authors@R: c(
+    person("Oliveira", "Kyle", email = "koliveira@bigelow.org", role = c("ctb")),
+    person("Tupper", "Ben", email = "btupper@bigelow.org", role = c("aut", "cre")))
 URL: https://github.com/bigelowlab/twinkle
 Version: 0.1
 License: MIT + file LICENSE

@@ -2,30 +2,28 @@
 % Please edit documentation in R/pairs.R
 \name{pairs,data.frame-method}
 \alias{pairs,data.frame-method}
-\title{Pairwise matrix of scatterplot for data.frame objects - modeled after [terra::pairs()]}
+\title{Pairwise matrix of scatterplot for data.frame objects - modeled after `pairs`
+function in the [terra](https://CRAN.R-project.org/package=terra) package.}
 \usage{
 \S4method{pairs}{data.frame}(x, hist = TRUE, cor = TRUE, use = "pairwise.complete.obs", ...)
 }
 \arguments{
-\item{x}{the coordinates of points given as numeric columns of a
-    matrix or data frame.  Logical and factor columns are converted to
-    numeric in the same way that \code{\link{data.matrix}} does.
-  }
+\item{x}{SpatRaster}
 
-\item{...}{
-    arguments to be passed to or from methods.
+\item{hist}{logical. If TRUE a histogram of the values is shown on the diagonal}
 
-    Also, \link[graphics]{graphical parameters} can be given as can arguments to
-    \code{plot} such as \code{main}.  \code{par("oma")} will be set
-    appropriately unless specified.
-  }
+\item{cor}{logical. If TRUE the correlation coefficient is shown in the upper panels}
+
+\item{use}{argument passed to the \code{\link[stats]{cor}} function}
+
+\item{...}{additional arguments (graphical parameters)}
 }
 \value{
 a pairs plot
 }
 \description{
-I first made a `pairs-stars` for the [tidysdm::pairs()] function to match that 
-offered by [terra::pairs()].  But we like the plot so much we thought it worth
+I first made a `pairs-stars` for the [tidysdm](https://CRAN.R-project.org/package=tidysdm)to match that 
+offered by [terra](https://CRAN.R-project.org/package=terra).  But we like the plot so much we thought it worth
 adding a data.frame method.
 }
 \examples{

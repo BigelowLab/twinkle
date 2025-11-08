@@ -278,7 +278,7 @@ delta_stars <- function(x){
 #' @export
 #' @param x list of one or more \code{stars} objects.  Any NULL elements are
 #'   silently removed first.
-#' @param other arguments for c.stars()
+#' @param ... other arguments for c.stars()
 #' @return \code{stars} objects
 bind_attrs <- function(x, ...){
   # remove any null entries
@@ -632,6 +632,8 @@ combine_ready = function(x, y,
 		stop("y must be `stars` or `dimensions` object")
 	}
 	
+	dimx = dim(x)
+	dimy = dim(y)
 	compatico = TRUE
 	if (length(x) != length(y)){
 		message(sprintf("x has %i dims while y has %i", length(dimx), length(dimy)))
@@ -640,8 +642,8 @@ combine_ready = function(x, y,
 	
 	if (!all(names(x) %in% names(y))){
 		message(sprintf("x has [%s] dims while y has [%s]"),
-						paste(names(x, collapse = ",")),
-						paste(names(y, collapse = ",")))
+						paste(names(x), collapse = ","),
+						paste(names(y), collapse = ","))
 		return(!compatico)
 	}
 	
@@ -650,7 +652,7 @@ combine_ready = function(x, y,
 		return(!compatico)
 	}
 	
-	sf::st_crs(x) = sf::st_crs(y) <- NA_crs_
+	sf::st_crs(x) = sf::st_crs(y) <- sf::NA_crs_
 	
 	for (nm in names(x)){
 		dx = x[[nm]]

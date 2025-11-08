@@ -1,10 +1,11 @@
-#' Pairwise matrix of scatterplot for data.frame objects - modeled after [terra::pairs()]
+#' Pairwise matrix of scatterplot for data.frame objects - modeled after `pairs`
+#' function in the [terra](https://CRAN.R-project.org/package=terra) package.
 #'
-#' I first made a `pairs-stars` for the [tidysdm::pairs()] function to match that 
-#' offered by [terra::pairs()].  But we like the plot so much we thought it worth
+#' I first made a `pairs-stars` for the [tidysdm](https://CRAN.R-project.org/package=tidysdm)to match that 
+#' offered by [terra](https://CRAN.R-project.org/package=terra).  But we like the plot so much we thought it worth
 #' adding a data.frame method.
 #' 
-#' @inheritParams graphics::pairs
+#' @inheritParams terra::pairs
 #' @returns a pairs plot
 #' @rdname pairs-data.frame
 #' @export
@@ -13,7 +14,7 @@
 #'   dplyr::as_tibble() |>
 #'   dplyr::select(-dplyr::all_of("Species"))
 #' pairs(x)
-setMethod(
+methods::setMethod(
 	"pairs", signature(x = "data.frame"),
 	function(x, hist = TRUE, cor = TRUE, use = "pairwise.complete.obs",  ...) {
 		if (length(x) < 2) {
@@ -38,7 +39,7 @@ setMethod(
 			graphics::par(usr = c(0, 1, 0, 1))
 			r <- abs(stats::cor(x, y, use = use))
 			txt <- format(c(r, 0.123456789), digits = 2)[1]
-			text(0.5, 0.5, txt, cex = max(0.5, r * 2))
+			graphics::text(0.5, 0.5, txt, cex = max(0.5, r * 2))
 		}
 		
 		if (hist) {
@@ -66,23 +67,26 @@ setMethod(
 )
 
 
-#' Pairwise matrix of scatterplot for `stars` objects - modeled after [terra::pairs()]
+#' Pairwise matrix of scatterplot for `stars` objects - modeled after [terra](https://CRAN.R-project.org/package=terra)
 #'
-#' I first made a `pairs-stars` for the [tidysdm::pairs()] function to match that 
-#' offered by [terra::pairs()]. 
+#' I first made a `pairs-stars` for the [tidysdm](https://CRAN.R-project.org/package=tidysdm)to match that 
+#' offered by [terra](https://CRAN.R-project.org/package=terra).
 #' 
 #' @inheritParams terra::pairs
 #' @returns a pairs plot of the attributes of the `stars` object.
 #' @rdname pairs-stars
 #' @export
 #' @examples
+#' \dontrun{
+#' require(terra)
 #' r <- terra::rast(system.file("ex/elev.tif", package = "terra"))
 #' s <- c(r, 1 / r, sqrt(r))
 #' names(s) <- c("elevation", "inverse", "sqrt")
 #' terra::pairs(s)
 #' s_stars <- stars::st_as_stars(s, as_attributes = TRUE)
 #' pairs(s_stars)
-setMethod(
+#' }
+methods::setMethod(
 	"pairs", signature(x = "stars"),
 	function(x, hist = TRUE, cor = TRUE, use = "pairwise.complete.obs",  
 					 maxcells = 100000, ...) {
@@ -108,7 +112,7 @@ setMethod(
 			graphics::par(usr = c(0, 1, 0, 1))
 			r <- abs(stats::cor(x, y, use = use))
 			txt <- format(c(r, 0.123456789), digits = 2)[1]
-			text(0.5, 0.5, txt, cex = max(0.5, r * 2))
+			graphics::text(0.5, 0.5, txt, cex = max(0.5, r * 2))
 		}
 		
 		if (hist) {
@@ -130,7 +134,7 @@ setMethod(
 		              x[[name]][index]
 		            },
 		            x = x, index = ix, simplify = FALSE
-		) %>%
+		) |>
 		  as.data.frame()
 
 		dots <- list(...)

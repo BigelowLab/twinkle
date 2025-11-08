@@ -11,12 +11,15 @@ Encoding: UTF-8
 Depends:
     R (>= 4.1)
 Imports:
-    stats,
-    graphics, 
-    rlang,
-    dplyr,
-    sf,
-    stars,
-    geometry,
-    RANN
+	methods,
+  stats,
+  graphics, 
+  rlang,
+  dplyr,
+  sf,
+  stars,
+  geometry,
+  RANN
+Suggests:
+	geosphere
 RoxygenNote: 7.3.2

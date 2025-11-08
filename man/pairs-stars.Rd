@@ -2,7 +2,7 @@
 % Please edit documentation in R/pairs.R
 \name{pairs,stars-method}
 \alias{pairs,stars-method}
-\title{Pairwise matrix of scatterplot for `stars` objects - modeled after [terra::pairs()]}
+\title{Pairwise matrix of scatterplot for `stars` objects - modeled after [terra](https://CRAN.R-project.org/package=terra)}
 \usage{
 \S4method{pairs}{stars}(
   x,
@@ -30,14 +30,17 @@
 a pairs plot of the attributes of the `stars` object.
 }
 \description{
-I first made a `pairs-stars` for the [tidysdm::pairs()] function to match that 
-offered by [terra::pairs()].
+I first made a `pairs-stars` for the [tidysdm](https://CRAN.R-project.org/package=tidysdm)to match that 
+offered by [terra](https://CRAN.R-project.org/package=terra).
 }
 \examples{
+\dontrun{
+require(terra)
 r <- terra::rast(system.file("ex/elev.tif", package = "terra"))
 s <- c(r, 1 / r, sqrt(r))
 names(s) <- c("elevation", "inverse", "sqrt")
 terra::pairs(s)
 s_stars <- stars::st_as_stars(s, as_attributes = TRUE)
 pairs(s_stars)
+}
 }

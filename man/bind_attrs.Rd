@@ -10,7 +10,7 @@ bind_attrs(x, ...)
 \item{x}{list of one or more \code{stars} objects.  Any NULL elements are
 silently removed first.}
 
-\item{other}{arguments for c.stars()}
+\item{...}{other arguments for c.stars()}
 }
 \value{
 \code{stars} objects

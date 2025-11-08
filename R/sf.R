@@ -19,7 +19,7 @@
 #'    dplyr::group_by(name) |>
 #'    dplyr::group_map(make_one_polygon, crs = "WGS84") |>
 #'    dplyr::bind_rows()
-#' }m
+#' }
 points_to_polygon <- function(x = dplyr::tibble(x = c(1,2,1,0), 
                                                 y = c(0,1,2,1)), 
                               crs =  "WGS84"){

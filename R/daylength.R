@@ -1,13 +1,68 @@
-#' Function to create a day length stars object
+#' day_length generic
+#'
+#' @param x vector of latitudes, sf or stars object 
+#' @param ... Arguments passed to or from other methods
+#' @export
+day_length <- function(x, ...) {
+	UseMethod("day_length")
+}
+
+#' day_length default method
+#'
+#' @export
+#' @param x num latitude values
+#' @param ... Arguments passed to or from other methods
+#' @export
+day_length.default <- function(x, ...) {
+	geosphere::daylength(x, ...)
+}
+
+#' Function to compute daylength for a sfc object
 #' 
-#' Day length is compute form the latitude coordinates for the center of each cell
+#' @export
+#' @param x sfc object
+#' @param doy numeric or Date, day-of-year or Date, the date to compute day length
+#' @return vector of day length values
+day_length.sfc = function(x = read_buoys(),
+												doy = as.Date("2014-01-01")){
+	
+	if (!requireNamespace("geosphere")){
+		stop("please install the geosphere package first")
+	}
+	if (!sf::st_is_longlat(x)){
+		stop("input must be in degrees longitude-latitude")
+	}
+	xy = sf::st_coordinates(x)
+	geosphere::daylength(xy[,1], doy)
+}
+
+#' Function to compute daylength for a sf object
+#' 
+#' @export
+#' @param x stars, template stars object on which to build
+#' @param doy numeric or Date, day-of-year or Date, the date to compute day length
+#' @return vector of day length values
+day_length.sf = function(x = read_buoys(),
+												doy = as.Date("2014-01-01")){
+	
+	if (!requireNamespace("geosphere")){
+		stop("please install the geosphere package first")
+	}
+	if (!sf::st_is_longlat(x)){
+		stop("input must be in degrees longitude-latitude")
+	}
+	xy = sf::st_coordinates(x)
+	geosphere::daylength(xy[,1], doy)
+}
+
+#' Function to create a day length stars object
 #' 
 #' @export
 #' @param x stars, template stars object on which to build
 #' @param doy numeric or Date, day-of-year or Date, the date to compute day length
 #' @param transfer_na logical, if TRUE transfer NAs from x to the output
 #' @return stars object with day length in hours per cell
-daylength = function(x = stars::read_stars(system.file("datasets/20140601-20140630-sst.tif", 
+day_length.stars = function(x = stars::read_stars(system.file("datasets/20140601-20140630-sst.tif", 
 																									     package = "twinkle")) |>
 										 	dplyr::slice("band", 1),
 										 doy = as.Date("2014-01-01"),
@@ -16,7 +71,9 @@ daylength = function(x = stars::read_stars(system.file("datasets/20140601-201406
 	if (!requireNamespace("geosphere")){
 		stop("please install the geosphere package first")
 	}
-	
+	if (!sf::st_is_longlat(x)){
+		stop("input must be in degrees longitude-latitude")
+	}
 	dims = dim(x)
 	x = x[1] |>
 		rlang::set_names("daylength")

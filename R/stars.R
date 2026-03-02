@@ -365,38 +365,54 @@ stars_pts_to_loc <- function(pts = stars_index_to_loc(form = 'sf') |>
 
   if (!is_stars(x)) stop("Input x must be a stars class")
   # In theory we don't know it is third, but we don't have access to st_upfront
-  xbandname <- names(dim(x))[3]
-  if(!(xbandname %in% names(pts))) {
-    if ("band" %in% names(pts)) {
-      pbandname = "band"
-    } else {
-      stop("Input pts must have a variable that matches 'band' or the name of the x band dimension:", xbandname)
-    }
-  } else {
-    pbandname = xbandname
-  }
-  
-  shape <- shape_stars(x)
-
-  #xp <- stars::st_xy2sfc(x[,,,1], as_points = FALSE, na.rm = FALSE)
-  #cell <- sf::st_intersects(sf::st_geometry(pts), sf::st_geometry(xp)) |>
-  #  unlist()
-  cell <- stars::st_cells(x, pts)
-  bandvals <- stars::st_get_dimension_values(x, which = xbandname)
-  
-  band <- match(pts[[pbandname]], bandvals)
-  step <- (band - 1) * shape[['ncell']]
-  index <- cell + step
-  colrow <- colrow_from_cells(x, cell)
-  xv <- stars::st_get_dimension_values(x, which = 1)[colrow[,1, drop = TRUE]]
-  yv <- stars::st_get_dimension_values(x, which = 2)[colrow[,2, drop = TRUE]]
-  r <- dplyr::tibble(index = as.integer(index), 
-                     cell = as.integer(cell), 
-                     col = as.integer(colrow[,1, drop = TRUE]), 
-                     row = as.integer(colrow[,2, drop = TRUE]), 
-                     band = as.integer(band),
-                     x = xv, 
-                     y = yv)
+	dimnamesx = names(dim(x))
+	
+	if (length(dimnamesx) == 2){
+		shape <- shape_stars(x)
+		cell <- stars::st_cells(x, pts)
+		band = 1
+		step <- shape[['ncell']]
+		index <- cell 
+		colrow <- colrow_from_cells(x, cell)
+		xv <- stars::st_get_dimension_values(x, which = 1)[colrow[,1, drop = TRUE]]
+		yv <- stars::st_get_dimension_values(x, which = 2)[colrow[,2, drop = TRUE]]
+		r <- dplyr::tibble(index = as.integer(index), 
+											 cell = as.integer(cell), 
+											 col = as.integer(colrow[,1, drop = TRUE]), 
+											 row = as.integer(colrow[,2, drop = TRUE]), 
+											 band = as.integer(band),
+											 x = xv, 
+											 y = yv)
+	} else {
+  	xbandname <- dimnamesx[3]
+  	if(!(xbandname %in% names(pts))) {
+  	  if ("band" %in% names(pts)) {
+  	    pbandname = "band"
+  	  } else {
+  	    stop("Input pts must have a variable that matches 'band' or the name of the x band dimension:", xbandname)
+  	  }
+  	} else {
+  	  pbandname = xbandname
+  	}
+  	
+  	shape <- shape_stars(x)
+	 	cell <- stars::st_cells(x, pts)
+  	bandvals <- stars::st_get_dimension_values(x, which = xbandname)
+  	
+  	band <- match(pts[[pbandname]], bandvals)
+  	step <- (band - 1) * shape[['ncell']]
+  	index <- cell + step
+  	colrow <- colrow_from_cells(x, cell)
+  	xv <- stars::st_get_dimension_values(x, which = 1)[colrow[,1, drop = TRUE]]
+  	yv <- stars::st_get_dimension_values(x, which = 2)[colrow[,2, drop = TRUE]]
+  	r <- dplyr::tibble(index = as.integer(index), 
+  	                   cell = as.integer(cell), 
+  	                   col = as.integer(colrow[,1, drop = TRUE]), 
+  	                   row = as.integer(colrow[,2, drop = TRUE]), 
+  	                   band = as.integer(band),
+  	                   x = xv, 
+  	                   y = yv)
+	}
   if (tolower(form[1]) == 'sf'){
     r <- sf::st_as_sf(r, coords = c("x", "y"), crs = sf::st_crs(x))
   }

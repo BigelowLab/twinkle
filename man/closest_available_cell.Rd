@@ -20,8 +20,8 @@ See \code{\link{make_raster_lut}}}
 \item{verbose}{logical, if TRUE output messages}
 }
 \value{
-sf object with two attributes \code{index} (the index of the closets non-NA point)
-  and \code{original} (the original index)
+sf object with attributes \code{index} (the index of the closets non-NA point)
+  \code{x}, \code{y} (coordinates associated with index) and \code{original} (the original index)
 }
 \description{
 Determine the closest non-NA pixel given [lon,lat] and a lut raster

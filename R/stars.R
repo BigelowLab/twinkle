@@ -117,9 +117,10 @@ mplot <- function(x = volcano_multi(threshold = 120),
 #' @param lut stars object, look-up with precomputed closest non-NA cells. 
 #'   See \code{\link{make_raster_lut}}
 #' @param verbose logical, if TRUE output messages
-#' @return sf object with two attributes \code{index} (the index of the closets non-NA point)
-#'   and \code{original} (the original index)
-closest_available_cell <- function(x = volcano_points(), lut = make_raster_lut(),
+#' @return sf object with attributes \code{index} (the index of the closets non-NA point)
+#'   \code{x}, \code{y} (coordinates associated with index) and \code{original} (the original index)
+closest_available_cell <- function(x = volcano_points(), 
+																	 lut = make_raster_lut(),
                                    verbose = FALSE){
   
   if (!inherits(x, c("sf", "sfc"))){
@@ -131,10 +132,15 @@ closest_available_cell <- function(x = volcano_points(), lut = make_raster_lut()
   }
   
   index <- stars::st_extract(lut, at = x)
-  index = dplyr::mutate(index, 
-  											original = stars::st_cells(lut, x), .after = 1)
-  index
-  
+  xy = sf::st_coordinates(lut)
+  newx = xy[index$index, 1, drop = TRUE]
+  newy = xy[index$index, 2, drop = TRUE]
+  original_index = stars::st_cells(lut, x)
+  dplyr::mutate(index, 
+  							x = newx,
+  							y = newy,
+  							original = original_index, 
+  							.after = 1)
 }
 
 

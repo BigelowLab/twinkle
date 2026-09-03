@@ -56,11 +56,12 @@ methods::setMethod(
 		dots <- list(...)
 		cex <- dots$cex
 		main <- dots$main
+		pch <- dots$pch
 		if (is.null(cex)) cex <- 0.5
 		if (is.null(main)) main <- ""
-		
+		if (is.null(pch)) pch <- 1
 		graphics::pairs(x,
-										main = main, cex = cex,
+										main = main, cex = cex, pch = pch,
 										upper.panel = up, diag.panel = dp
 		)
 	}
@@ -140,11 +141,12 @@ methods::setMethod(
 		dots <- list(...)
 		cex <- dots$cex
 		main <- dots$main
+		pch <- dots$pch
 		if (is.null(cex)) cex <- 0.5
 		if (is.null(main)) main <- ""
-		
+		if (is.null(pch)) pch <- 1
 		graphics::pairs(d,
-										main = main, cex = cex,
+										main = main, cex = cex, pch = pch,
 										upper.panel = up, diag.panel = dp
 		)
 	}

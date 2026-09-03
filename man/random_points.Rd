@@ -11,6 +11,7 @@ random_points(
   na.rm = FALSE,
   points = NULL,
   polygon = NULL,
+  replace = FALSE,
   form = c("table", "sf")[1]
 )
 }
@@ -30,6 +31,8 @@ then point avoidance is handled.  Ignored if NULL.}
 \item{polygon}{polygon (sf) that describes the region to select
 points from.  Ignored if NULL.}
 
+\item{replace}{logical, should sampling be with replacement?}
+
 \item{form}{character, specifies output format as "table" (default) or "sf"}
 }
 \value{
@@ -40,12 +43,14 @@ Providing a polygon to limit the search area can speed up the search
 if the polygon is small relative to the spatial cover of the stars geometry.
 }
 \details{
-Note that it is possible
-to filter the available pool of candidate cells to something
+Note that it is possible to filter the available pool of candidate cells to something
 less than the requested sample size, n.  In such cases you might try
 adjusting the value of \code{m} higher. If you still have issues then
 investigate the presence of NAs (if \code{na.rm = TRUE}), or the size
 of the \code{polygon} (if provided.)
+
+Note that if the `x` input has an non-origin offset then issues may be encountered
+  when converting point locations to grid cell indices.
 }
 \examples{
 \dontrun{

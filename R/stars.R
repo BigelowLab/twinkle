@@ -430,12 +430,14 @@ stars_pts_to_loc <- function(pts = stars_index_to_loc(form = 'sf') |>
 #' Providing a polygon to limit the search area can speed up the search
 #' if the polygon is small relative to the spatial cover of the stars geometry.
 #'
-#' Note that it is possible
-#' to filter the available pool of candidate cells to something
+#' Note that it is possible to filter the available pool of candidate cells to something
 #' less than the requested sample size, n.  In such cases you might try
 #' adjusting the value of \code{m} higher. If you still have issues then
 #' investigate the presence of NAs (if \code{na.rm = TRUE}), or the size
 #' of the \code{polygon} (if provided.)
+#' 
+#' Note that if the `x` input has an non-origin offset then issues may be encountered
+#'   when converting point locations to grid cell indices. 
 #'
 #' @export
 #' @param x stars object
@@ -447,6 +449,7 @@ stars_pts_to_loc <- function(pts = stars_index_to_loc(form = 'sf') |>
 #'        then point avoidance is handled.  Ignored if NULL.
 #' @param polygon polygon (sf) that describes the region to select
 #'        points from.  Ignored if NULL.
+#' @param replace	logical, should sampling be with replacement?
 #' @param form character, specifies output format as "table" (default) or "sf"
 #' @return a table or sf POINT object of locations with values.
 #' @examples
@@ -500,6 +503,7 @@ random_points <- function(x = volcano_multi(what = "bands", threshold = 120),
                           na.rm = FALSE,
                           points = NULL,
                           polygon = NULL,
+													replace = FALSE,
                           form = c("table", "sf")[1]){
 
   if (!is_stars(x)) stop("Input x must be a stars class")
@@ -522,11 +526,11 @@ random_points <- function(x = volcano_multi(what = "bands", threshold = 120),
     # propagate from cell numbers for first layer to cell numbers for all layers
     loc <- unlist(lapply(step, function(s) cell + s))
     if (length(loc) > n*m) {
-      loc <- sample(loc, n*m, replace = FALSE)
+      loc <- sample(loc, n*m, replace = replace)
     }
     loc <- stars_index_to_loc(loc, x, form = "sf")
   } else {
-    loc <- sample(shape[["nindex"]], n*m, replace = FALSE) |>
+    loc <- sample(shape[["nindex"]], n*m, replace = replace) |>
       stars_index_to_loc(x, form = "sf")
   }
   # now get the values for each attribute
@@ -586,7 +590,7 @@ random_points <- function(x = volcano_multi(what = "bands", threshold = 120),
     warning("fewer than requested points sampled - try increasing value of m")
   } else {
     loc <- loc |>
-      dplyr::slice_sample(n = n, replace = FALSE)
+      dplyr::slice_sample(n = n, replace = replace)
   }
 
   if (tolower(form[1]) == 'sf'){
